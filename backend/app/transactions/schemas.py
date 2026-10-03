@@ -50,3 +50,8 @@ class TransactionOut(BaseModel):
 
 class TransactionSaved(BaseModel):
     transaction: TransactionOut
+
+
+class TransactionPage(BaseModel):
+    items: list[TransactionOut]
+    next_cursor: str | None

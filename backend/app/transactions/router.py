@@ -1,6 +1,7 @@
+import datetime as dt
 import uuid
 
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, Query
 from sqlalchemy.orm import Session
 
 from app.auth.deps import get_current_user
@@ -10,13 +11,18 @@ from app.transactions.models import Transaction
 from app.transactions.schemas import (
     TransactionCreate,
     TransactionOut,
+    TransactionPage,
     TransactionSaved,
+    TransactionStatus,
+    TransactionType,
     TransactionUpdate,
 )
 from app.transactions.service import (
+    TransactionFilters,
     create_transaction,
     delete_transaction,
     get_transaction,
+    list_transactions,
     update_transaction,
 )
 
@@ -32,6 +38,29 @@ def create(
     body: TransactionCreate, user: User = Depends(get_current_user), db: Session = Depends(get_db)
 ) -> TransactionSaved:
     return _saved(db, user.id, create_transaction(db, user.id, body))
+
+
+@router.get("", response_model=TransactionPage)
+def list_(
+    date_from: dt.date | None = Query(None, alias="from"),
+    date_to: dt.date | None = Query(None, alias="to"),
+    type: TransactionType | None = None,
+    category_id: uuid.UUID | None = None,
+    account_id: uuid.UUID | None = None,
+    status: TransactionStatus | None = None,
+    q: str | None = Query(None, max_length=100),
+    limit: int = Query(50, ge=1, le=100),
+    cursor: str | None = None,
+    user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+) -> TransactionPage:
+    filters = TransactionFilters(
+        date_from, date_to, type, category_id, account_id, status, q, limit, cursor
+    )
+    items, next_cursor = list_transactions(db, user.id, filters)
+    return TransactionPage(
+        items=[TransactionOut.model_validate(t) for t in items], next_cursor=next_cursor
+    )
 
 
 @router.get("/{transaction_id}", response_model=TransactionOut)

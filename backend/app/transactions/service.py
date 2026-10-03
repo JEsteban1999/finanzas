@@ -1,5 +1,10 @@
+import base64
+import datetime as dt
+import json
 import uuid
+from dataclasses import dataclass
 
+from sqlalchemy import or_, select, tuple_
 from sqlalchemy.orm import Session
 
 from app.core.db import get_owned
@@ -58,3 +63,61 @@ def update_transaction(
 def delete_transaction(db: Session, user_id: uuid.UUID, txn_id: uuid.UUID) -> None:
     db.delete(get_transaction(db, user_id, txn_id))
     db.commit()
+
+
+@dataclass(frozen=True)
+class TransactionFilters:
+    date_from: dt.date | None = None
+    date_to: dt.date | None = None
+    type: str | None = None
+    category_id: uuid.UUID | None = None
+    account_id: uuid.UUID | None = None
+    status: str | None = None
+    q: str | None = None
+    limit: int = 50
+    cursor: str | None = None
+
+
+def _encode_cursor(txn: Transaction) -> str:
+    raw = json.dumps([txn.date.isoformat(), txn.created_at.isoformat(), str(txn.id)])
+    return base64.urlsafe_b64encode(raw.encode()).decode()
+
+
+def _decode_cursor(cursor: str) -> tuple[dt.date, dt.datetime, uuid.UUID]:
+    try:
+        d, c, i = json.loads(base64.urlsafe_b64decode(cursor.encode()))
+        return dt.date.fromisoformat(d), dt.datetime.fromisoformat(c), uuid.UUID(i)
+    except (ValueError, TypeError) as exc:
+        raise AppError(422, "INVALID_CURSOR", "Cursor inválido") from exc
+
+
+def _escape_like(value: str) -> str:
+    return value.replace("\\", "\\\\").replace("%", "\\%").replace("_", "\\_")
+
+
+def list_transactions(
+    db: Session, user_id: uuid.UUID, f: TransactionFilters
+) -> tuple[list[Transaction], str | None]:
+    t = Transaction
+    stmt = select(t).where(t.user_id == user_id)
+    if f.date_from:
+        stmt = stmt.where(t.date >= f.date_from)
+    if f.date_to:
+        stmt = stmt.where(t.date <= f.date_to)
+    if f.type:
+        stmt = stmt.where(t.type == f.type)
+    if f.category_id:
+        stmt = stmt.where(t.category_id == f.category_id)
+    if f.account_id:
+        stmt = stmt.where(or_(t.account_id == f.account_id, t.to_account_id == f.account_id))
+    if f.status:
+        stmt = stmt.where(t.status == f.status)
+    if f.q:
+        stmt = stmt.where(t.description.ilike(f"%{_escape_like(f.q)}%", escape="\\"))
+    if f.cursor:
+        d, c, i = _decode_cursor(f.cursor)
+        stmt = stmt.where(tuple_(t.date, t.created_at, t.id) < tuple_(d, c, i))
+    stmt = stmt.order_by(t.date.desc(), t.created_at.desc(), t.id.desc()).limit(f.limit + 1)
+    rows = list(db.scalars(stmt))
+    next_cursor = _encode_cursor(rows[f.limit - 1]) if len(rows) > f.limit else None
+    return rows[: f.limit], next_cursor
