@@ -1,5 +1,5 @@
 import uuid
-from datetime import datetime
+from datetime import datetime, timedelta
 
 from sqlalchemy import select
 from sqlalchemy.dialects.postgresql import insert as pg_insert
@@ -28,7 +28,15 @@ def list_templates(db: Session, user_id: uuid.UUID) -> list[RecurringTemplate]:
     )
 
 
-def create_template(db: Session, user_id: uuid.UUID, data: RecurringCreate) -> RecurringTemplate:
+def create_template(
+    db: Session, user_id: uuid.UUID, data: RecurringCreate, now: datetime
+) -> RecurringTemplate:
+    user = db.get(User, user_id)
+    today = local_today(now, user.timezone if user else "America/Bogota")
+    if data.start_date < today - timedelta(days=366):
+        raise AppError(
+            422, "START_DATE_TOO_OLD", "La fecha de inicio no puede ser de hace más de un año"
+        )
     validate_shape(
         db, user_id, Shape(data.type, data.account_id, data.to_account_id, data.category_id)
     )

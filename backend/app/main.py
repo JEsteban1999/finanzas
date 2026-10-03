@@ -10,7 +10,7 @@ from app.ai.router import router as ai_router
 from app.auth.router import router as auth_router
 from app.budgets.router import router as budgets_router
 from app.categories.router import router as categories_router
-from app.core.config import get_settings
+from app.core.config import get_settings, validate_production_settings
 from app.core.errors import error_body, register_error_handlers
 from app.core.ratelimit import RateLimiter
 from app.dashboard.router import router as dashboard_router
@@ -36,6 +36,9 @@ def _configure_logging() -> None:
 def create_app() -> FastAPI:
     _configure_logging()
     settings = get_settings()
+    problems = validate_production_settings(settings)
+    if problems:
+        raise RuntimeError("Configuración de producción inválida: " + "; ".join(problems))
     app = FastAPI(title="Finanzas API")
     app.state.login_limiter = RateLimiter(settings.login_rate_limit_per_minute, 60)
     app.state.login_email_limiter = RateLimiter(settings.login_email_rate_limit_per_minute, 60)

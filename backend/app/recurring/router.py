@@ -34,9 +34,12 @@ def list_(
 
 @router.post("", status_code=201, response_model=RecurringOut)
 def create(
-    body: RecurringCreate, user: User = Depends(get_current_user), db: Session = Depends(get_db)
+    body: RecurringCreate,
+    user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+    now: datetime = Depends(get_now),
 ) -> RecurringTemplate:
-    return create_template(db, user.id, body)
+    return create_template(db, user.id, body, now)
 
 
 @router.patch("/{template_id}", response_model=RecurringOut)
