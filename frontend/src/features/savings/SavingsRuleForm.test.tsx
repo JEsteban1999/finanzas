@@ -75,4 +75,24 @@ describe("SavingsRuleForm", () => {
     await userEvent.click(screen.getByRole("button", { name: "Sí, quitar" }));
     await waitFor(() => expect(calls.some((c) => c.method === "DELETE")).toBe(true));
   });
+  it("keeps the saved confirmation after the first save", async () => {
+    let stored: unknown = null;
+    mockApi({
+      "GET /api/accounts": () => ({ body: accounts }),
+      "GET /api/categories": () => ({ body: categories }),
+      "GET /api/savings-rule": () => ({ body: stored }),
+      "PUT /api/savings-rule": ({ body }) => {
+        stored = body;
+        return { body };
+      },
+    });
+    renderWithClient(<SavingsRuleForm />);
+    await userEvent.type(await screen.findByLabelText("Valor"), "20");
+    await userEvent.selectOptions(screen.getByLabelText("Cuando entre dinero en"), "c2");
+    await userEvent.selectOptions(screen.getByLabelText("Apartar en la cuenta"), "a2");
+    await userEvent.click(screen.getByRole("button", { name: "Guardar regla" }));
+    expect(await screen.findByRole("status")).toHaveTextContent("Regla guardada");
+    expect(await screen.findByRole("button", { name: "Quitar regla" })).toBeInTheDocument();
+    expect(screen.getByRole("status")).toHaveTextContent("Regla guardada");
+  });
 });

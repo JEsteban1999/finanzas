@@ -11,7 +11,13 @@ import { type SavingsRule, useDeleteSavingsRule, usePutSavingsRule, useSavingsRu
 
 type Mode = "percent" | "fixed";
 
-function RuleFields({ current }: { current: SavingsRule | null | undefined }) {
+type RuleFieldsProps = {
+  current: SavingsRule | null | undefined;
+  saved: boolean;
+  onSaved: (saved: boolean) => void;
+};
+
+function RuleFields({ current, saved, onSaved }: RuleFieldsProps) {
   const rule = useSavingsRule();
   const accounts = useAccounts();
   const categories = useCategories();
@@ -25,7 +31,6 @@ function RuleFields({ current }: { current: SavingsRule | null | undefined }) {
   const [targetId, setTargetId] = useState(current?.target_account_id ?? "");
   const [active, setActive] = useState(current?.active ?? true);
   const [localError, setLocalError] = useState<string | null>(null);
-  const [saved, setSaved] = useState(false);
 
   const savingsAccounts = (accounts.data ?? []).filter((a) => a.type === "savings");
   const incomeCategories = (categories.data ?? []).filter((c) => c.kind === "income");
@@ -40,7 +45,7 @@ function RuleFields({ current }: { current: SavingsRule | null | undefined }) {
 
   async function onSubmit(event: FormEvent) {
     event.preventDefault();
-    setSaved(false);
+    onSaved(false);
     let numeric: number;
     if (mode === "percent") {
       numeric = Number(value);
@@ -57,7 +62,7 @@ function RuleFields({ current }: { current: SavingsRule | null | undefined }) {
     setLocalError(null);
     try {
       await put.mutateAsync({ mode, value: numeric, trigger_category_id: triggerId, target_account_id: targetId, active });
-      setSaved(true);
+      onSaved(true);
     } catch {
       // Error visible abajo.
     }
@@ -96,12 +101,12 @@ function RuleFields({ current }: { current: SavingsRule | null | undefined }) {
         <input type="checkbox" checked={active} onChange={(e) => setActive(e.target.checked)} />
         Activa
       </label>
-      <FormError error={localError ?? put.error ?? remove.error ?? rule.error} />
+      <FormError error={localError ?? put.error ?? remove.error ?? rule.error ?? accounts.error ?? categories.error} />
       {saved && <p role="status">Regla guardada</p>}
       <div className="flex gap-2">
         <button type="submit" disabled={put.isPending}>Guardar regla</button>
         {rule.data && (
-          <ConfirmButton label="Quitar regla" confirmLabel="Sí, quitar" onConfirm={() => remove.mutate()} />
+          <ConfirmButton label="Quitar regla" confirmLabel="Sí, quitar" onConfirm={() => { onSaved(false); remove.mutate(); }} />
         )}
       </div>
     </form>
@@ -112,8 +117,10 @@ export function SavingsRuleForm() {
   const rule = useSavingsRule();
   const accounts = useAccounts();
   const categories = useCategories();
+  // The confirmation lives here because RuleFields remounts when the rule first appears.
+  const [saved, setSaved] = useState(false);
   // Initial state comes from the loaded rule and select values need their options present,
   // so mount the form only once all three queries have settled.
   if (rule.isPending || accounts.isPending || categories.isPending) return null;
-  return <RuleFields key={rule.data ? "rule" : "new"} current={rule.data} />;
+  return <RuleFields key={rule.data ? "rule" : "new"} current={rule.data} saved={saved} onSaved={setSaved} />;
 }
