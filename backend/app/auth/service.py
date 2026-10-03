@@ -4,6 +4,7 @@ from sqlalchemy import select, update
 from sqlalchemy.orm import Session
 
 from app.auth.models import Invitation, User, UserSession
+from app.categories.service import seed_default_categories
 from app.core.config import get_settings
 from app.core.errors import AppError
 from app.core.security import DUMMY_HASH, hash_password, hash_token, new_token, verify_password
@@ -20,6 +21,7 @@ def create_user(db: Session, email: str, password: str, display_name: str) -> Us
     user = User(email=email, password_hash=hash_password(password), display_name=display_name)
     db.add(user)
     db.flush()
+    seed_default_categories(db, user.id)
     db.commit()
     return user
 

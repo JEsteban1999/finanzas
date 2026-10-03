@@ -4,6 +4,7 @@ from starlette.middleware.base import RequestResponseEndpoint
 from starlette.responses import Response
 
 from app.auth.router import router as auth_router
+from app.categories.router import router as categories_router
 from app.core.config import get_settings
 from app.core.errors import error_body, register_error_handlers
 from app.core.ratelimit import RateLimiter
@@ -36,6 +37,7 @@ def create_app() -> FastAPI:
         return {"status": "ok"}
 
     app.include_router(auth_router)
+    app.include_router(categories_router)
     return app
 
 
