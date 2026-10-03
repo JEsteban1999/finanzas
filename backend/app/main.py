@@ -4,6 +4,7 @@ from starlette.middleware.base import RequestResponseEndpoint
 from starlette.responses import Response
 
 from app.accounts.router import router as accounts_router
+from app.ai.router import router as ai_router
 from app.auth.router import router as auth_router
 from app.budgets.router import router as budgets_router
 from app.categories.router import router as categories_router
@@ -52,6 +53,7 @@ def create_app() -> FastAPI:
     app.include_router(recurring_router)
     app.include_router(recurring_internal_router)
     app.include_router(dashboard_router)
+    app.include_router(ai_router)
     return app
 
 
