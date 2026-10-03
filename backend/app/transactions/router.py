@@ -8,6 +8,7 @@ from app.auth.deps import get_current_user
 from app.auth.models import User
 from app.budgets.service import budget_effect
 from app.core.db import get_db
+from app.savings.service import savings_effect
 from app.transactions.models import Transaction
 from app.transactions.schemas import (
     TransactionCreate,
@@ -34,6 +35,7 @@ def _saved(db: Session, user_id: uuid.UUID, txn: Transaction) -> TransactionSave
     return TransactionSaved(
         transaction=TransactionOut.model_validate(txn),
         budget_status=budget_effect(db, user_id, txn),
+        savings_suggestion=savings_effect(db, user_id, txn),
     )
 
 

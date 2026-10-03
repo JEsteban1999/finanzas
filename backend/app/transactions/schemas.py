@@ -6,6 +6,7 @@ from pydantic import BaseModel, ConfigDict
 
 from app.budgets.schemas import BudgetStatusItem
 from app.core.types import Description, Money
+from app.savings.schemas import SavingsSuggestion
 
 TransactionType = Literal["income", "expense", "transfer"]
 TransactionStatus = Literal["confirmed", "pending"]
@@ -52,6 +53,7 @@ class TransactionOut(BaseModel):
 class TransactionSaved(BaseModel):
     transaction: TransactionOut
     budget_status: BudgetStatusItem | None = None
+    savings_suggestion: SavingsSuggestion | None = None
 
 
 class TransactionPage(BaseModel):
