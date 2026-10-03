@@ -1,4 +1,4 @@
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useInfiniteQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { api, type Schemas } from "@/lib/api/client";
 import { unwrap } from "@/lib/api/errors";
 
@@ -58,5 +58,26 @@ export function useDeleteTransaction() {
         params: { path: { transaction_id: id } },
       })),
     onSuccess: invalidate,
+  });
+}
+
+export type TransactionFilters = {
+  from?: string;
+  to?: string;
+  type?: TransactionType;
+  category_id?: string;
+  account_id?: string;
+  status?: "confirmed" | "pending";
+};
+
+export function useTransactions(filters: TransactionFilters) {
+  return useInfiniteQuery({
+    queryKey: ["transactions", filters],
+    initialPageParam: null as string | null,
+    queryFn: ({ pageParam }) =>
+      unwrap(api.GET("/api/transactions", {
+        params: { query: { ...filters, limit: 30, cursor: pageParam ?? undefined } },
+      })),
+    getNextPageParam: (lastPage) => lastPage.next_cursor ?? undefined,
   });
 }
