@@ -15,7 +15,12 @@ export function useCategories(includeArchived = false) {
 
 function useInvalidateCategories() {
   const qc = useQueryClient();
-  return () => qc.invalidateQueries({ queryKey: ["categories"] });
+  return () =>
+    Promise.all([
+      qc.invalidateQueries({ queryKey: ["categories"] }),
+      qc.invalidateQueries({ queryKey: ["budgets"] }),
+      qc.invalidateQueries({ queryKey: ["dashboard"] }),
+    ]);
 }
 
 export function useCreateCategory() {

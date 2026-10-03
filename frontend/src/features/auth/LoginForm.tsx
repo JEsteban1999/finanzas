@@ -6,7 +6,13 @@ import { FormError } from "@/components/FormError";
 import { useLogin } from "./api";
 
 export function safeNext(next: string | null): string {
-  return next && next.startsWith("/") && !next.startsWith("//") ? next : "/";
+  if (!next) return "/";
+  try {
+    const url = new URL(next, window.location.origin);
+    return url.origin === window.location.origin ? url.pathname + url.search + url.hash : "/";
+  } catch {
+    return "/";
+  }
 }
 
 export function LoginForm() {

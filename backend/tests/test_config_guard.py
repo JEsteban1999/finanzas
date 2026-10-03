@@ -6,11 +6,11 @@ from app.main import create_app
 
 
 def test_development_has_no_checks():
-    assert validate_production_settings(Settings(environment="development")) == []
+    assert validate_production_settings(Settings(_env_file=None, environment="development")) == []
 
 
 def test_production_rejects_dev_defaults():
-    problems = validate_production_settings(Settings(environment="production"))
+    problems = validate_production_settings(Settings(_env_file=None, environment="production"))
     assert set(problems) == {
         "COOKIE_SECURE debe ser true",
         "CRON_TOKEN no puede ser el valor de desarrollo",
@@ -21,6 +21,7 @@ def test_production_rejects_dev_defaults():
 
 def test_production_ok():
     settings = Settings(
+        _env_file=None,
         environment="production",
         cookie_secure=True,
         cron_token="un-token-largo-y-aleatorio",

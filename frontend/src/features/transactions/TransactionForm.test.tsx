@@ -127,4 +127,39 @@ describe("TransactionForm", () => {
     expect(screen.getByLabelText("Cuenta")).toHaveValue("a1");
     expect(screen.getByLabelText("Categoría")).toHaveValue("c1");
   });
+
+  it("keeps an archived account and category from initial as labelled options", async () => {
+    const archivedAccount = { ...accounts[0], id: "a9", name: "Vieja", archived: true };
+    const archivedCategory = { id: "c9", name: "Antigua", kind: "expense", archived: true };
+    mockApi({
+      "GET /api/accounts": ({ url }) => ({
+        body: url.searchParams.get("include_archived") === "true" ? [...accounts, archivedAccount] : accounts,
+      }),
+      "GET /api/categories": ({ url }) => ({
+        body: url.searchParams.get("include_archived") === "true" ? [...categories, archivedCategory] : categories,
+      }),
+    });
+    renderWithClient(
+      <TransactionForm
+        initial={{ type: "expense", account_id: "a9", category_id: "c9" }}
+        submitLabel="Guardar"
+        onSubmit={vi.fn()}
+      />,
+    );
+    expect(await screen.findByRole("option", { name: "Vieja (archivada)" })).toBeInTheDocument();
+    expect(screen.getByRole("option", { name: "Antigua (archivada)" })).toBeInTheDocument();
+    expect(screen.getByLabelText("Cuenta")).toHaveValue("a9");
+    expect(screen.getByLabelText("Categoría")).toHaveValue("c9");
+    expect(screen.queryByRole("option", { name: /^Bancolombia \(archivada\)/ })).not.toBeInTheDocument();
+  });
+
+  it("asks to create an account first when there are none", async () => {
+    mockApi({
+      "GET /api/accounts": () => ({ body: [] }),
+      "GET /api/categories": () => ({ body: categories }),
+    });
+    renderWithClient(<TransactionForm submitLabel="Guardar" onSubmit={vi.fn()} />);
+    expect(await screen.findByText(/Primero crea una cuenta\./)).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: "Ir a cuentas" })).toHaveAttribute("href", "/mas/cuentas");
+  });
 });

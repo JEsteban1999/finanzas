@@ -22,7 +22,11 @@ export function useAccounts(includeArchived = false) {
 
 function useInvalidateAccounts() {
   const qc = useQueryClient();
-  return () => qc.invalidateQueries({ queryKey: ["accounts"] });
+  return () =>
+    Promise.all([
+      qc.invalidateQueries({ queryKey: ["accounts"] }),
+      qc.invalidateQueries({ queryKey: ["dashboard"] }),
+    ]);
 }
 
 export function useCreateAccount() {

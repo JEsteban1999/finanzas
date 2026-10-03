@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useState, type FormEvent } from "react";
 import { FormError } from "@/components/FormError";
 import { useAccounts } from "@/features/accounts/api";
@@ -47,6 +48,8 @@ const TYPES: { value: TransactionType; label: string }[] = [
 export function TransactionForm({ initial = {}, missingFields = [], submitLabel, onSubmit, onCancel }: Props) {
   const accounts = useAccounts();
   const categories = useCategories();
+  const allAccounts = useAccounts(true);
+  const allCategories = useCategories(true);
   const [type, setType] = useState<TransactionType>(initial.type ?? "expense");
   const [amountText, setAmountText] = useState(initial.amount ? formatCOP(initial.amount).slice(1) : "");
   const [date, setDate] = useState(initial.date ?? todayISO());
@@ -63,6 +66,17 @@ export function TransactionForm({ initial = {}, missingFields = [], submitLabel,
   const accountId = accountChoice ?? defaultAccountId;
 
   const kindCategories = (categories.data ?? []).filter((c) => c.kind === type);
+
+  // Cuentas/categorías archivadas que ya vienen en `initial` (editar o confirmar):
+  // se ofrecen como opción extra para no perder el valor.
+  const initialAccountIds = [initial.account_id, initial.to_account_id];
+  const archivedAccounts = (allAccounts.data ?? []).filter(
+    (a) => initialAccountIds.includes(a.id) && !(accounts.data ?? []).some((x) => x.id === a.id),
+  );
+  const archivedCategories = (allCategories.data ?? []).filter(
+    (c) => c.id === initial.category_id && c.kind === type && !(categories.data ?? []).some((x) => x.id === c.id),
+  );
+  const noAccounts = accounts.isSuccess && accounts.data.length === 0;
 
   function changeType(next: TransactionType) {
     setType(next);
@@ -150,6 +164,7 @@ export function TransactionForm({ initial = {}, missingFields = [], submitLabel,
           <select value={accountId} onChange={(e) => setAccountId(e.target.value)} {...fieldProps("account_id")}>
             <option value="">Elige una cuenta</option>
             {accounts.data?.map((a) => <option key={a.id} value={a.id}>{a.name}</option>)}
+            {archivedAccounts.map((a) => <option key={a.id} value={a.id}>{a.name} (archivada)</option>)}
           </select>
         </label>
         {hint("account_id")}
@@ -165,6 +180,9 @@ export function TransactionForm({ initial = {}, missingFields = [], submitLabel,
               {accounts.data?.filter((a) => a.id !== accountId).map((a) => (
                 <option key={a.id} value={a.id}>{a.name}</option>
               ))}
+              {archivedAccounts.filter((a) => a.id !== accountId).map((a) => (
+                <option key={a.id} value={a.id}>{a.name} (archivada)</option>
+              ))}
             </select>
           </label>
           {hint("to_account_id")}
@@ -177,6 +195,7 @@ export function TransactionForm({ initial = {}, missingFields = [], submitLabel,
               {...fieldProps("category_id")}>
               <option value="">Elige una categoría</option>
               {kindCategories.map((c) => <option key={c.id} value={c.id}>{c.name}</option>)}
+              {archivedCategories.map((c) => <option key={c.id} value={c.id}>{c.name} (archivada)</option>)}
             </select>
           </label>
           {hint("category_id")}
@@ -192,6 +211,11 @@ export function TransactionForm({ initial = {}, missingFields = [], submitLabel,
         <div role="alert">
           <ul>{errors.map((e) => <li key={e}>{e}</li>)}</ul>
         </div>
+      )}
+      {noAccounts && (
+        <p role="status">
+          Primero crea una cuenta. <Link href="/mas/cuentas">Ir a cuentas</Link>
+        </p>
       )}
       <FormError error={accounts.error ?? categories.error} />
 

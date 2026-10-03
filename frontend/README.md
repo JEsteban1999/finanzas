@@ -1,36 +1,42 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Finanzas personales — frontend
 
-## Getting Started
+Next.js 16 (PWA móvil) que consume el backend FastAPI a través de un proxy `/api/*` (rewrites de Next), de modo que el navegador solo habla con el mismo origen y las cookies de sesión funcionan.
 
-First, run the development server:
+## Desarrollo
+
+Requisitos: Node 24, backend corriendo (ver `../backend`).
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+npm ci
+BACKEND_URL=http://localhost:8000 npm run dev   # http://localhost:3000
+npm test            # Vitest
+npm run lint
+npm run typecheck
+npm run gen:api     # regenera src/lib/api/schema.d.ts desde el OpenAPI del backend (usa uv o `python -m uv`)
+npm run e2e         # Playwright
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Prerrequisitos de `npm run e2e`: Postgres de desarrollo arriba (`docker compose up -d db` en la raíz, puerto 5434), dependencias del backend instaladas (`uv sync`) y `npx playwright install chromium`. Playwright levanta solo el backend (puerto 8010) y el frontend (puerto 3100). En CI se define `UV_CMD=uv`.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Variables de entorno
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+| Variable | Dónde | Descripción |
+| --- | --- | --- |
+| `BACKEND_URL` | frontend | URL del backend a la que Next reenvía `/api/*`. En desarrollo por defecto `http://localhost:8000`. **Obligatoria en producción**: `next build` falla si falta. |
+| `ALLOWED_ORIGIN` | backend | Origen del frontend permitido por el backend. Debe coincidir con el dominio desde el que se sirve este frontend; si no, el backend responde 403 `ORIGIN_NOT_ALLOWED`. |
 
-## Learn More
+`BACKEND_URL` (frontend) y `ALLOWED_ORIGIN` (backend) van emparejadas: cada despliegue del frontend apunta a un backend cuyo `ALLOWED_ORIGIN` es el dominio de ese frontend.
 
-To learn more about Next.js, take a look at the following resources:
+## Build
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+`next build` usa `NODE_ENV=production`, por lo que requiere `BACKEND_URL`:
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+```bash
+BACKEND_URL=http://localhost:8000 npm run build
+```
 
-## Deploy on Vercel
+## Despliegue en Vercel
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+- Define `BACKEND_URL` en las variables de entorno del proyecto (URL pública del backend).
+- En el backend, `ALLOWED_ORIGIN` debe ser el dominio de producción del frontend.
+- Limitación: los previews de pull request tienen un dominio distinto, así que el backend responde 403 `ORIGIN_NOT_ALLOWED` a sus peticiones, salvo que el preview apunte a un backend cuyo `ALLOWED_ORIGIN` coincida con el dominio del preview.

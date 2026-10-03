@@ -44,7 +44,11 @@ describe("LoginForm", () => {
 describe("safeNext", () => {
   it.each([
     ["/movimientos", "/movimientos"],
+    ["/movimientos?x=1", "/movimientos?x=1"],
     ["//evil.com", "/"],
+    ["/\\evil.com", "/"],
+    ["/\t/evil.com", "/"],
+    ["", "/"],
     ["https://evil.com", "/"],
     [null, "/"],
   ])("%s → %s", (input, expected) => {
