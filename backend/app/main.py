@@ -3,6 +3,7 @@ from fastapi.responses import JSONResponse
 from starlette.middleware.base import RequestResponseEndpoint
 from starlette.responses import Response
 
+from app.accounts.router import router as accounts_router
 from app.auth.router import router as auth_router
 from app.categories.router import router as categories_router
 from app.core.config import get_settings
@@ -38,6 +39,7 @@ def create_app() -> FastAPI:
 
     app.include_router(auth_router)
     app.include_router(categories_router)
+    app.include_router(accounts_router)
     return app
 
 
