@@ -69,5 +69,7 @@ def delete_account(db: Session, user_id: uuid.UUID, account_id: uuid.UUID) -> No
     except IntegrityError as exc:
         db.rollback()
         raise AppError(
-            409, "ACCOUNT_IN_USE", "La cuenta tiene movimientos; archívala en su lugar"
+            409,
+            "ACCOUNT_IN_USE",
+            "La cuenta está en uso (movimientos, recurrentes o regla de ahorro); archívala en su lugar",
         ) from exc

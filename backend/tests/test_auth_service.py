@@ -61,3 +61,11 @@ def test_cli_reset_password_sets_temp_password_and_revokes_sessions(db, capsys):
 def test_cli_reset_password_unknown_user(db, capsys):
     assert main(["reset-password", "nadie@example.com"], db=db) == 1
     assert "Usuario no encontrado" in capsys.readouterr().err
+
+
+def test_cli_create_user(db, capsys):
+    args = ["create-user", "E2E@Example.com", "--password", "clave-segura-123", "--name", "E2E"]
+    assert main(args, db=db) == 0
+    assert "Usuario creado: e2e@example.com" in capsys.readouterr().out
+    assert main(args, db=db) == 1
+    assert "Ya existe" in capsys.readouterr().err

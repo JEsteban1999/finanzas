@@ -10,6 +10,11 @@ JOB = "/internal/jobs/recurring"
 AUTH = {"Authorization": "Bearer dev-cron-token"}
 
 
+@pytest.fixture(autouse=True)
+def fixed_now(set_now):
+    set_now(datetime(2026, 10, 3, 15, 0, tzinfo=UTC))
+
+
 @pytest.fixture
 def s(client_a):
     return {
@@ -225,3 +230,19 @@ def test_cron_token_comparison_handles_non_ascii():
     assert _valid_cron_token("Bearer ñ") is False
     assert _valid_cron_token("Bearer ñ中") is False
     assert _valid_cron_token(None) is False
+
+
+def test_start_date_too_old_is_rejected(client_a, s):
+    response = client_a.post(
+        "/api/recurring",
+        json={
+            "type": "expense",
+            "amount": 1,
+            "account_id": s["debit"],
+            "category_id": s["vivienda"],
+            "day_of_month": 1,
+            "start_date": "2025-10-01",
+        },
+    )
+    assert response.status_code == 422
+    assert response.json()["error"]["code"] == "START_DATE_TOO_OLD"

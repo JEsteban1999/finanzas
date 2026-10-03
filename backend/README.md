@@ -22,6 +22,7 @@ uv run uvicorn app.main:app --reload
 
 | Variable | Descripción |
 |---|---|
+| `ENVIRONMENT` | `production` en Railway. En producción el backend se niega a arrancar si faltan `COOKIE_SECURE=true`, un `CRON_TOKEN` propio, `AI_PARSER=claude` y `ANTHROPIC_API_KEY` |
 | `DATABASE_URL` | `postgresql+psycopg://...`. En Neon, cambia el prefijo `postgresql://` por `postgresql+psycopg://` y conserva `?sslmode=require` |
 | `ALLOWED_ORIGIN` | Origen del frontend (p. ej. `https://finanzas.vercel.app`) |
 | `COOKIE_SECURE` | `true` en producción |

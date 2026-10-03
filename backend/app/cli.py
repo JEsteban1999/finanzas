@@ -3,7 +3,7 @@ import sys
 
 from sqlalchemy.orm import Session
 
-from app.auth.service import create_invitation, reset_password
+from app.auth.service import create_invitation, create_user, reset_password
 from app.core.clock import utcnow
 from app.core.config import get_settings
 from app.core.db import SessionLocal
@@ -15,6 +15,10 @@ def _parser() -> argparse.ArgumentParser:
     sub = parser.add_subparsers(dest="command", required=True)
     invite = sub.add_parser("invite", help="Crea una invitación y muestra el enlace")
     invite.add_argument("email")
+    create = sub.add_parser("create-user", help="Crea un usuario directamente (admin/e2e)")
+    create.add_argument("email")
+    create.add_argument("--password", required=True)
+    create.add_argument("--name", required=True)
     reset = sub.add_parser("reset-password", help="Asigna una contraseña temporal")
     reset.add_argument("email")
     return parser
@@ -28,6 +32,9 @@ def main(argv: list[str] | None = None, db: Session | None = None) -> int:
         if args.command == "invite":
             token = create_invitation(session, args.email, utcnow())
             print(f"{get_settings().invite_base_url}?token={token}")
+        elif args.command == "create-user":
+            user = create_user(session, args.email, args.password, args.name)
+            print(f"Usuario creado: {user.email}")
         else:
             temporary = reset_password(session, args.email, utcnow())
             print(f"Contraseña temporal para {args.email}: {temporary}")

@@ -8,3 +8,6 @@ __pycache__/
 .pytest_cache/
 node_modules/
 .next/
+frontend/openapi.json
+frontend/test-results/
+frontend/playwright-report/
