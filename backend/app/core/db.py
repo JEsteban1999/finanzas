@@ -1,11 +1,13 @@
 import uuid
 from collections.abc import Iterator
 from datetime import datetime
+from typing import Any, TypeVar
 
 from sqlalchemy import DateTime, MetaData, create_engine, func
 from sqlalchemy.orm import DeclarativeBase, Mapped, Session, mapped_column, sessionmaker
 
 from app.core.config import get_settings
+from app.core.errors import AppError
 
 NAMING_CONVENTION = {
     "ix": "ix_%(column_0_label)s",
@@ -14,6 +16,8 @@ NAMING_CONVENTION = {
     "fk": "fk_%(table_name)s_%(column_0_name)s_%(referred_table_name)s",
     "pk": "pk_%(table_name)s",
 }
+
+T = TypeVar("T")
 
 
 class Base(DeclarativeBase):
@@ -38,3 +42,10 @@ def get_db() -> Iterator[Session]:
         yield db
     finally:
         db.close()
+
+
+def get_owned(db: Session, model: type[T], obj_id: uuid.UUID, user_id: uuid.UUID, code: str) -> T:
+    obj: Any = db.get(model, obj_id)
+    if obj is None or obj.user_id != user_id:
+        raise AppError(404, code, "No encontrado")
+    return obj  # type: ignore[no-any-return]

@@ -5,7 +5,7 @@ requires-python = ">=3.12"
 dependencies = [
     "fastapi>=0.115",
     "uvicorn[standard]>=0.32",
-    "sqlalchemy>=2.0.36",
+    "sqlalchemy>=2.1",
     "psycopg[binary]>=3.2",
     "alembic>=1.14",
     "pydantic>=2.9",
@@ -38,7 +38,7 @@ target-version = "py312"
 
 [tool.ruff.lint]
 select = ["E", "F", "I", "B", "UP"]
-ignore = ["B008", "E501"]
+ignore = ["B008", "E501", "UP047"]
 
 [tool.mypy]
 python_version = "3.12"
