@@ -7,8 +7,8 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 class Settings(BaseSettings):
     model_config = SettingsConfigDict(env_file=".env", extra="ignore")
 
-    database_url: str = "postgresql+psycopg://finanzas:finanzas@localhost:5433/finanzas"
-    test_database_url: str = "postgresql+psycopg://finanzas:finanzas@localhost:5433/finanzas_test"
+    database_url: str = "postgresql+psycopg://finanzas:finanzas@localhost:5434/finanzas"
+    test_database_url: str = "postgresql+psycopg://finanzas:finanzas@localhost:5434/finanzas_test"
     allowed_origin: str = "http://localhost:3000"
     cookie_secure: bool = False
     session_days: int = 30
