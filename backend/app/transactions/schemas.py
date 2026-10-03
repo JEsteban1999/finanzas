@@ -47,6 +47,7 @@ class TransactionOut(BaseModel):
     description: str | None
     status: TransactionStatus
     source: str
+    recurring_template_id: UUID | None
     created_at: dt.datetime
 
 

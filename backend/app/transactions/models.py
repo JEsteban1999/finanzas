@@ -1,7 +1,15 @@
 import datetime as dt
 import uuid
 
-from sqlalchemy import BigInteger, CheckConstraint, Date, ForeignKey, Index, String
+from sqlalchemy import (
+    BigInteger,
+    CheckConstraint,
+    Date,
+    ForeignKey,
+    Index,
+    String,
+    UniqueConstraint,
+)
 from sqlalchemy.orm import Mapped, mapped_column
 
 from app.core.db import Base, IdTimestampMixin
@@ -23,6 +31,7 @@ class Transaction(IdTimestampMixin, Base):
             "source IN ('manual', 'voice', 'recurring', 'savings_rule')", name="source_valid"
         ),
         CheckConstraint(SHAPE_CHECK, name="shape_valid"),
+        UniqueConstraint("recurring_template_id", "date", name="uq_transactions_template_date"),
         Index("ix_transactions_user_date", "user_id", "date"),
         Index("ix_transactions_user_category_date", "user_id", "category_id", "date"),
     )
@@ -41,3 +50,6 @@ class Transaction(IdTimestampMixin, Base):
     description: Mapped[str | None] = mapped_column(String(200))
     status: Mapped[str] = mapped_column(String(10), default="confirmed")
     source: Mapped[str] = mapped_column(String(15), default="manual")
+    recurring_template_id: Mapped[uuid.UUID | None] = mapped_column(
+        ForeignKey("recurring_templates.id", ondelete="SET NULL")
+    )

@@ -10,6 +10,8 @@ from app.categories.router import router as categories_router
 from app.core.config import get_settings
 from app.core.errors import error_body, register_error_handlers
 from app.core.ratelimit import RateLimiter
+from app.recurring.router import internal_router as recurring_internal_router
+from app.recurring.router import router as recurring_router
 from app.savings.router import router as savings_router
 from app.transactions.router import router as transactions_router
 
@@ -46,6 +48,8 @@ def create_app() -> FastAPI:
     app.include_router(transactions_router)
     app.include_router(budgets_router)
     app.include_router(savings_router)
+    app.include_router(recurring_router)
+    app.include_router(recurring_internal_router)
     return app
 
 

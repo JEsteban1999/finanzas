@@ -60,6 +60,19 @@ def update_transaction(
     return txn
 
 
+def confirm_transaction(
+    db: Session, user_id: uuid.UUID, txn_id: uuid.UUID, data: TransactionUpdate
+) -> Transaction:
+    txn = get_transaction(db, user_id, txn_id)
+    if txn.status != "pending":
+        raise AppError(409, "TRANSACTION_NOT_PENDING", "Este movimiento ya está confirmado")
+    apply_changes(db, user_id, txn, data)
+    txn.status = "confirmed"
+    db.commit()
+    db.refresh(txn)
+    return txn
+
+
 def delete_transaction(db: Session, user_id: uuid.UUID, txn_id: uuid.UUID) -> None:
     db.delete(get_transaction(db, user_id, txn_id))
     db.commit()

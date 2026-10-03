@@ -21,6 +21,7 @@ from app.transactions.schemas import (
 )
 from app.transactions.service import (
     TransactionFilters,
+    confirm_transaction,
     create_transaction,
     delete_transaction,
     get_transaction,
@@ -95,3 +96,14 @@ def delete(
     db: Session = Depends(get_db),
 ) -> None:
     delete_transaction(db, user.id, transaction_id)
+
+
+@router.post("/{transaction_id}/confirm", response_model=TransactionSaved)
+def confirm(
+    transaction_id: uuid.UUID,
+    body: TransactionUpdate | None = None,
+    user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+) -> TransactionSaved:
+    txn = confirm_transaction(db, user.id, transaction_id, body or TransactionUpdate())
+    return _saved(db, user.id, txn)
