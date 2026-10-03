@@ -108,3 +108,28 @@ def test_mutation_without_origin_header_is_allowed(app, db):
         "/api/auth/login", json={"email": "ana@example.com", "password": "clave-segura-123"}
     )
     assert response.status_code == 200
+
+
+def _assert_session_cookie_flags(set_cookie: str) -> None:
+    lowered = set_cookie.lower()
+    assert set_cookie.startswith("session=")
+    assert "max-age=2592000" in lowered
+    assert "httponly" in lowered
+    assert "samesite=lax" in lowered
+    assert "path=/" in lowered
+    assert "secure" not in lowered
+
+
+def test_login_cookie_flags(client, db):
+    create_user(db, "ana@example.com", "clave-segura-123", "Ana")
+    response = client.post(
+        "/api/auth/login", json={"email": "ana@example.com", "password": "clave-segura-123"}
+    )
+    _assert_session_cookie_flags(response.headers["set-cookie"])
+
+
+def test_me_reissues_session_cookie(client_a):
+    response = client_a.get("/api/auth/me")
+    assert response.status_code == 200
+    _assert_session_cookie_flags(response.headers["set-cookie"])
+    assert response.headers["set-cookie"].split(";")[0] == f"session={client_a.cookies['session']}"

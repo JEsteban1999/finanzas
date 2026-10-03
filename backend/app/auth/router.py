@@ -4,7 +4,7 @@ from datetime import datetime
 from fastapi import APIRouter, Depends, Request, Response
 from sqlalchemy.orm import Session
 
-from app.auth.deps import SESSION_COOKIE, get_current_user
+from app.auth.deps import SESSION_COOKIE, get_current_user, set_session_cookie
 from app.auth.models import User
 from app.auth.schemas import LoginIn, RegisterIn, UserOut
 from app.auth.service import (
@@ -15,24 +15,10 @@ from app.auth.service import (
     revoke_session,
 )
 from app.core.clock import get_now
-from app.core.config import get_settings
 from app.core.db import get_db
 from app.core.errors import AppError
 
 router = APIRouter(prefix="/api/auth", tags=["auth"])
-
-
-def _set_session_cookie(response: Response, token: str) -> None:
-    settings = get_settings()
-    response.set_cookie(
-        SESSION_COOKIE,
-        token,
-        max_age=settings.session_days * 86400,
-        httponly=True,
-        secure=settings.cookie_secure,
-        samesite="lax",
-        path="/",
-    )
 
 
 @router.post("/register", status_code=201, response_model=UserOut)
@@ -45,7 +31,7 @@ def register(
 ) -> User:
     user = register_with_invitation(db, body.token, body.password, body.display_name, now)
     token = create_session(db, user, now, request.headers.get("user-agent"))
-    _set_session_cookie(response, token)
+    set_session_cookie(response, token)
     return user
 
 
@@ -65,7 +51,7 @@ def login(
     if user is None:
         raise AppError(401, "INVALID_CREDENTIALS", "Email o contraseña incorrectos")
     token = create_session(db, user, now, request.headers.get("user-agent"))
-    _set_session_cookie(response, token)
+    set_session_cookie(response, token)
     return user
 
 
