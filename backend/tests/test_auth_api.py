@@ -3,6 +3,7 @@ from datetime import UTC, datetime, timedelta
 from fastapi.testclient import TestClient
 
 from app.auth.service import create_invitation, create_user
+from tests.conftest import ORIGIN
 
 NOW = datetime(2026, 10, 3, 12, 0, tzinfo=UTC)
 
@@ -133,3 +134,20 @@ def test_me_reissues_session_cookie(client_a):
     assert response.status_code == 200
     _assert_session_cookie_flags(response.headers["set-cookie"])
     assert response.headers["set-cookie"].split(";")[0] == f"session={client_a.cookies['session']}"
+
+
+def test_login_rate_limit_cannot_be_bypassed_by_rotating_client_ip(app, db):
+    create_user(db, "ana@example.com", "clave-segura-123", "Ana")
+    codes = []
+    for i in range(12):
+        rotating = TestClient(
+            app,
+            headers={"Origin": ORIGIN, "X-Forwarded-For": f"10.0.0.{i}"},
+            client=(f"10.0.0.{i}", 5000),
+        )
+        response = rotating.post(
+            "/api/auth/login", json={"email": "Ana@Example.com", "password": "mala-123"}
+        )
+        codes.append(response.status_code)
+    assert codes[:10] == [401] * 10
+    assert codes[10:] == [429, 429]

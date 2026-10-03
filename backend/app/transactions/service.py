@@ -5,6 +5,7 @@ import uuid
 from dataclasses import dataclass
 
 from sqlalchemy import or_, select, tuple_
+from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
 from app.core.db import get_owned
@@ -50,12 +51,22 @@ def apply_changes(
         setattr(txn, field, value)
 
 
+def _commit_or_conflict(db: Session) -> None:
+    try:
+        db.commit()
+    except IntegrityError as exc:
+        db.rollback()
+        raise AppError(
+            409, "DUPLICATE_OCCURRENCE", "Ya existe ese movimiento recurrente en esa fecha"
+        ) from exc
+
+
 def update_transaction(
     db: Session, user_id: uuid.UUID, txn_id: uuid.UUID, data: TransactionUpdate
 ) -> Transaction:
     txn = get_transaction(db, user_id, txn_id)
     apply_changes(db, user_id, txn, data)
-    db.commit()
+    _commit_or_conflict(db)
     db.refresh(txn)
     return txn
 
@@ -68,7 +79,7 @@ def confirm_transaction(
         raise AppError(409, "TRANSACTION_NOT_PENDING", "Este movimiento ya está confirmado")
     apply_changes(db, user_id, txn, data)
     txn.status = "confirmed"
-    db.commit()
+    _commit_or_conflict(db)
     db.refresh(txn)
     return txn
 

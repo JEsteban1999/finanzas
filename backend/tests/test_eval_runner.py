@@ -43,3 +43,25 @@ def test_score_case_passes_on_match_and_reports_mismatches():
     assert score_case(case, good) == []
     bad = DraftTransaction(type="expense", amount=3500, category_id=None, account_id=accs["Nu"])
     assert set(score_case(case, bad)) == {"amount", "category", "account"}
+
+
+def test_run_cases_counts_ai_unavailable_as_failure_and_continues(capsys):
+    from app.ai.parser import AIUnavailableError
+    from evals.run_parser_eval import run_cases
+
+    cats, accs = _ids()
+
+    class Stub:
+        def parse(self, text, context):
+            if text == "boom":
+                raise AIUnavailableError()
+            return DraftTransaction(type="expense", amount=100, account_id=accs["Nu"])
+
+    cases = [
+        {"text": "boom", "expected": {"amount": 100}},
+        {"text": "ok", "expected": {"amount": 100}},
+    ]
+    passed, latencies = run_cases(Stub(), cases)
+    assert passed == 1
+    assert len(latencies) == 1
+    assert "ERROR 'boom': AIUnavailableError" in capsys.readouterr().out

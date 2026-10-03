@@ -15,7 +15,10 @@ def test_parse_month_valid():
     assert parse_month("2026-10") == date(2026, 10, 1)
 
 
-@pytest.mark.parametrize("value", ["2026-13", "2026-1", "26-10", "octubre", ""])
+@pytest.mark.parametrize(
+    "value",
+    ["2026-13", "2026-1", "26-10", "octubre", "", "9999-12", "+202-10", "1899-12", "٢٠٢٦-١٠"],
+)
 def test_parse_month_invalid(value):
     with pytest.raises(AppError) as exc:
         parse_month(value)
@@ -85,3 +88,15 @@ def test_not_found_route_format():
     response = TestClient(_error_app()).get("/nope")
     assert response.status_code == 404
     assert response.json()["error"]["code"] == "HTTP_404"
+
+
+def test_app_logger_is_configured_once():
+    import logging
+
+    from app.main import create_app
+
+    create_app()
+    create_app()
+    assert logging.getLogger("app.ai").getEffectiveLevel() == logging.INFO
+    ours = [h for h in logging.getLogger("app").handlers if getattr(h, "_finanzas", False)]
+    assert len(ours) == 1

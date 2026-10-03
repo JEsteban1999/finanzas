@@ -1,3 +1,5 @@
+import logging
+
 from fastapi import FastAPI, Request
 from fastapi.responses import JSONResponse
 from starlette.middleware.base import RequestResponseEndpoint
@@ -20,10 +22,23 @@ from app.transactions.router import router as transactions_router
 MUTATING_METHODS = {"POST", "PUT", "PATCH", "DELETE"}
 
 
+def _configure_logging() -> None:
+    logger = logging.getLogger("app")
+    logger.setLevel(logging.INFO)
+    if not any(getattr(h, "_finanzas", False) for h in logger.handlers):
+        handler = logging.StreamHandler()
+        handler._finanzas = True  # type: ignore[attr-defined]
+        handler.setFormatter(logging.Formatter("%(levelname)s %(name)s: %(message)s"))
+        logger.addHandler(handler)
+    logger.propagate = False
+
+
 def create_app() -> FastAPI:
+    _configure_logging()
     settings = get_settings()
     app = FastAPI(title="Finanzas API")
     app.state.login_limiter = RateLimiter(settings.login_rate_limit_per_minute, 60)
+    app.state.login_email_limiter = RateLimiter(settings.login_email_rate_limit_per_minute, 60)
     app.state.ai_limiter = RateLimiter(settings.ai_rate_limit_per_hour, 3600)
     register_error_handlers(app)
 

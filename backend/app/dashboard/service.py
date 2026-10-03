@@ -10,7 +10,8 @@ from app.accounts.models import Account
 from app.auth.models import User
 from app.budgets.service import compute_budget_status
 from app.categories.models import Category
-from app.core.months import add_months, format_month, month_bounds
+from app.core.errors import AppError
+from app.core.months import MIN_YEAR, add_months, format_month, month_bounds
 from app.dashboard.schemas import (
     AccountBalance,
     CategoryAmount,
@@ -136,6 +137,8 @@ def monthly_summary(db: Session, user: User, month: dt.date) -> MonthlySummary:
 
 def compare_months(db: Session, user_id: uuid.UUID, until: dt.date, months: int) -> CompareOut:
     first = add_months(until, -(months - 1))
+    if first.year < MIN_YEAR:
+        raise AppError(422, "INVALID_MONTH", "Mes inválido, usa AAAA-MM")
     end = add_months(until, 1)
     totals = _totals_by_month(db, user_id, first, end)
     inflow = _savings_flow(db, user_id, first, end, inbound=True)

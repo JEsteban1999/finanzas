@@ -125,3 +125,10 @@ def test_rule_is_per_user(client_a, client_b, s):
     assert client_b.get("/api/savings-rule").json() is None
     response = client_b.put("/api/savings-rule", json=_rule(s))
     assert response.status_code == 404
+
+
+def test_no_suggestion_when_target_account_is_archived(client_a, s):
+    client_a.put("/api/savings-rule", json=_rule(s))
+    client_a.patch(f"/api/accounts/{s['savings']}", json={"archived": True})
+    created = _income(client_a, s, "salario")
+    assert created["savings_suggestion"] is None

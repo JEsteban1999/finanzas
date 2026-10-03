@@ -141,3 +141,10 @@ def test_compare_months_out_of_range(client_a, months):
 def test_dashboard_is_scoped_to_user(client_b, s):
     m = _monthly(client_b, "2026-10")
     assert (m["income"], m["expense"], m["accounts"]) == (0, 0, [])
+
+
+def test_compare_before_year_1900_is_422_not_500(client_a):
+    response = client_a.get("/api/dashboard/compare", params={"until": "1900-01", "months": 24})
+    assert response.status_code == 422
+    assert response.json()["error"]["code"] == "INVALID_MONTH"
+    assert client_a.get("/api/budgets/status", params={"month": "9999-12"}).status_code == 422

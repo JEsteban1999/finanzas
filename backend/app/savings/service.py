@@ -60,6 +60,9 @@ def savings_effect(db: Session, user_id: uuid.UUID, txn: Transaction) -> Savings
         or rule.target_account_id == txn.account_id
     ):
         return None
+    target = db.get(Account, rule.target_account_id)
+    if target is None or target.archived:
+        return None
     amount = suggest_amount(rule.mode, rule.value, txn.amount)
     if amount <= 0:
         return None

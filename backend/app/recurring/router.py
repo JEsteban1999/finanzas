@@ -57,13 +57,19 @@ def delete(
     delete_template(db, user.id, template_id)
 
 
+def _valid_cron_token(header: str | None) -> bool:
+    if header is None:
+        return False
+    expected = f"Bearer {get_settings().cron_token}"
+    return secrets.compare_digest(header.encode(), expected.encode())
+
+
 @internal_router.post("/recurring")
 def run_recurring(
     authorization: str | None = Header(None),
     db: Session = Depends(get_db),
     now: datetime = Depends(get_now),
 ) -> dict[str, int]:
-    expected = f"Bearer {get_settings().cron_token}"
-    if authorization is None or not secrets.compare_digest(authorization, expected):
+    if not _valid_cron_token(authorization):
         raise AppError(401, "INVALID_CRON_TOKEN", "Token inválido")
     return {"created": run_due_templates(db, now)}

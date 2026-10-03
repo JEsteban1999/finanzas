@@ -26,6 +26,7 @@ uv run uvicorn app.main:app --reload
 | `ALLOWED_ORIGIN` | Origen del frontend (p. ej. `https://finanzas.vercel.app`) |
 | `COOKIE_SECURE` | `true` en producción |
 | `CRON_TOKEN` | Secreto largo aleatorio; el mismo valor va en el secret `CRON_TOKEN` de GitHub |
+| `INVITE_BASE_URL` | URL base de los enlaces de invitación; en producción `https://<frontend>/registro` |
 | `AI_PARSER` | `claude` en producción, `fake` en local |
 | `ANTHROPIC_API_KEY` | Solo en el backend |
 | `CLAUDE_MODEL` / `CLAUDE_EFFORT` / `CLAUDE_FALLBACKS` | Por defecto `claude-opus-5-5` / `low` / `true` |

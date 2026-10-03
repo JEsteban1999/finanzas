@@ -15,6 +15,7 @@ class Settings(BaseSettings):
     cron_token: str = "dev-cron-token"
     invite_base_url: str = "http://localhost:3000/registro"
     login_rate_limit_per_minute: int = 5
+    login_email_rate_limit_per_minute: int = 10
     ai_rate_limit_per_hour: int = 30
     ai_parser: Literal["fake", "claude"] = "fake"
     anthropic_api_key: str | None = None

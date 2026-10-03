@@ -1,15 +1,22 @@
 import calendar
+import re
 from datetime import date
 
 from app.core.errors import AppError
 
+MIN_YEAR = 1900
+MAX_YEAR = 9998
+_MONTH_RE = re.compile(r"[0-9]{4}-[0-9]{2}")
+
 
 def parse_month(value: str) -> date:
     try:
-        year_s, month_s = value.split("-")
-        if len(year_s) != 4 or len(month_s) != 2:
+        if not _MONTH_RE.fullmatch(value):
             raise ValueError(value)
-        return date(int(year_s), int(month_s), 1)
+        year, month = int(value[:4]), int(value[5:])
+        if not MIN_YEAR <= year <= MAX_YEAR:
+            raise ValueError(value)
+        return date(year, month, 1)
     except ValueError as exc:
         raise AppError(422, "INVALID_MONTH", "Mes inválido, usa AAAA-MM") from exc
 

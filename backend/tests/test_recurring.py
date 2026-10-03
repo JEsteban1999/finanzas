@@ -199,3 +199,29 @@ def test_other_user_cannot_touch_template(client_a, client_b, s):
     response = client_b.delete(f"/api/recurring/{tpl['id']}")
     assert response.json()["error"]["code"] == "RECURRING_NOT_FOUND"
     assert client_b.get("/api/recurring").json() == []
+
+
+def test_moving_generated_transaction_onto_sibling_date_is_conflict(app, client_a, s):
+    _template(client_a, s, start_date="2026-09-15")
+    _run(app, datetime(2026, 10, 20, 15, 0, tzinfo=UTC))
+    by_date = {t["date"]: t for t in _pending(client_a)}
+    response = client_a.patch(
+        f"/api/transactions/{by_date['2026-09-15']['id']}", json={"date": "2026-10-15"}
+    )
+    assert response.status_code == 409
+    assert response.json()["error"]["code"] == "DUPLICATE_OCCURRENCE"
+    confirm = client_a.post(
+        f"/api/transactions/{by_date['2026-09-15']['id']}/confirm", json={"date": "2026-10-15"}
+    )
+    assert confirm.status_code == 409
+    assert confirm.json()["error"]["code"] == "DUPLICATE_OCCURRENCE"
+    assert client_a.get("/api/accounts").status_code == 200  # session still usable
+
+
+def test_cron_token_comparison_handles_non_ascii():
+    from app.recurring.router import _valid_cron_token
+
+    assert _valid_cron_token("Bearer dev-cron-token") is True
+    assert _valid_cron_token("Bearer ñ") is False
+    assert _valid_cron_token("Bearer ñ中") is False
+    assert _valid_cron_token(None) is False

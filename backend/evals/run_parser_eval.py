@@ -13,6 +13,7 @@ from pathlib import Path
 from typing import Any
 
 from app.ai.context import AccountRef, CategoryRef, ParseContext
+from app.ai.parser import AIUnavailableError
 from app.ai.schemas import DraftTransaction
 
 CASES_PATH = Path(__file__).with_name("cases.json")
@@ -64,6 +65,25 @@ def score_case(case: dict[str, Any], draft: DraftTransaction) -> list[str]:
     return [field for field, expected in case["expected"].items() if actual[field] != expected]
 
 
+def run_cases(parser: Any, cases: list[dict[str, Any]]) -> tuple[int, list[float]]:
+    latencies: list[float] = []
+    passed = 0
+    for case in cases:
+        started = time.perf_counter()
+        try:
+            draft = parser.parse(case["text"], EVAL_CONTEXT)
+        except AIUnavailableError:
+            print(f"ERROR {case['text']!r}: AIUnavailableError")
+            continue
+        latencies.append(time.perf_counter() - started)
+        failures = score_case(case, draft)
+        if failures:
+            print(f"FALLA  {case['text']!r}: {failures} -> {_as_names(draft)}")
+        else:
+            passed += 1
+    return passed, latencies
+
+
 def main() -> int:
     from app.ai.deps import _claude_parser
     from app.core.config import get_settings
@@ -74,16 +94,7 @@ def main() -> int:
         return 2
     parser = _claude_parser()
     cases = json.loads(CASES_PATH.read_text("utf-8"))
-    latencies, passed = [], 0
-    for case in cases:
-        started = time.perf_counter()
-        draft = parser.parse(case["text"], EVAL_CONTEXT)
-        latencies.append(time.perf_counter() - started)
-        failures = score_case(case, draft)
-        if failures:
-            print(f"FALLA  {case['text']!r}: {failures} -> {_as_names(draft)}")
-        else:
-            passed += 1
+    passed, latencies = run_cases(parser, cases)
     rate = passed / len(cases)
     p95 = statistics.quantiles(latencies, n=20)[18]
     print(f"\nModelo {settings.claude_model} (effort={settings.claude_effort})")

@@ -44,8 +44,12 @@ def login(
     now: datetime = Depends(get_now),
 ) -> User:
     host = request.client.host if request.client else "unknown"
-    key = f"{host}|{normalize_email(body.email)}"
-    if not request.app.state.login_limiter.hit(key, time.monotonic()):
+    email = normalize_email(body.email)
+    moment = time.monotonic()
+    # Ambos buckets se consumen siempre; el de email no depende de la IP (X-Forwarded-For).
+    ip_ok = request.app.state.login_limiter.hit(f"{host}|{email}", moment)
+    email_ok = request.app.state.login_email_limiter.hit(email, moment)
+    if not (ip_ok and email_ok):
         raise AppError(429, "LOGIN_RATE_LIMITED", "Demasiados intentos, espera un minuto")
     user = authenticate(db, body.email, body.password)
     if user is None:
