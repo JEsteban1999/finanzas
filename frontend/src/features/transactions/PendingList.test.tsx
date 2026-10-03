@@ -49,6 +49,34 @@ describe("PendingList", () => {
     expect(calls.find((c) => c.method === "POST")!.body).toMatchObject({ amount: 1250000 });
   });
 
+  it("keeps feedback after the confirmed item disappears", async () => {
+    let confirmed = false;
+    const income = { ...pending, type: "income" };
+    mockApi({
+      "GET /api/accounts": () => ({ body: accounts }),
+      "GET /api/categories": () => ({ body: categories }),
+      "GET /api/transactions": () => ({ body: { items: confirmed ? [] : [income], next_cursor: null } }),
+      "POST /api/transactions/p1/confirm": () => {
+        confirmed = true;
+        return {
+          body: {
+            transaction: { ...income, status: "confirmed" },
+            budget_status: null,
+            savings_suggestion: { amount: 300000, from_account_id: "a1", to_account_id: "a9", date: "2026-10-01" },
+          },
+        };
+      },
+    });
+    renderWithClient(<PendingList />);
+    const row = (await screen.findByText("Arriendo")).closest("li")!;
+    await userEvent.click(within(row).getByRole("button", { name: "Confirmar" }));
+    await userEvent.click(within(row).getByRole("button", { name: "Confirmar movimiento" }));
+    expect(await screen.findByText("Movimiento guardado")).toBeInTheDocument();
+    expect(screen.getByText(/¿apartas \$300\.000 para tu ahorro\?/)).toBeInTheDocument();
+    await waitFor(() => expect(screen.queryByRole("heading", { name: "Por confirmar" })).not.toBeInTheDocument());
+    expect(screen.getByText("Movimiento guardado")).toBeInTheDocument();
+  });
+
   it("discards a pending movement", async () => {
     const { calls } = setup([pending], { "DELETE /api/transactions/p1": () => ({ status: 204 }) });
     renderWithClient(<PendingList />);
