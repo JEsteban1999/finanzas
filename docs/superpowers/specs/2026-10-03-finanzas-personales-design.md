@@ -70,7 +70,7 @@ Monorepo:
 
 ### Backend: módulos por dominio
 
-Cada módulo contiene `router` (HTTP), `service` (reglas de negocio), `repository` (acceso a datos) y `schemas` (Pydantic).
+Cada módulo contiene `models` (SQLAlchemy), `schemas` (Pydantic), `service` (reglas de negocio y acceso a datos) y `router` (HTTP). No hay una capa `repository` separada: las consultas son simples y viven en `service`.
 
 | Módulo | Responsabilidad |
 |---|---|
@@ -112,6 +112,7 @@ Todas las tablas tienen `id UUID`, `created_at` y `updated_at`. Las tablas de do
 
 **`accounts`**
 - `name`, `type` (`cash | debit | savings | credit_card`), `initial_balance`, `archived_at`.
+- Nombre único por usuario (`uq_accounts_user_name`), para que la IA pueda referirse a la cuenta por su nombre.
 - **El saldo no se guarda; se calcula**: `initial_balance` + ingresos − egresos + transferencias entrantes − transferencias salientes, contando solo transacciones `confirmed`.
 - **Tarjeta de crédito:** una compra es un egreso desde la cuenta TC, cuyo saldo queda negativo (eso es la deuda). Pagar la tarjeta es una transferencia débito → TC. El gasto cuenta en el mes de la compra.
 
@@ -180,17 +181,18 @@ Todas las tablas tienen `id UUID`, `created_at` y `updated_at`. Las tablas de do
   - los IDs, nombres y tipos de las cuentas activas;
   - el texto.
 - **No se envían** saldos, historial, montos previos, email ni nombre.
-- **Llamada con tool use** y un esquema estricto `draft_transaction`:
-  - `type`, `amount` (entero), `date` (ISO), `category_id`, `account_id`, `to_account_id`, `description`;
-  - `missing_fields: string[]`, `notes: string[]`.
-  - Los campos de ID se restringen a un `enum` con los IDs reales del usuario.
+- **Llamada con structured outputs** (`output_config.format` con un JSON Schema estricto), no con tool use: sirve en todos los modelos actuales, incluidos los que rechazan el `tool_choice` forzado.
+  - Campos: `type`, `amount` (entero), `date` (ISO), `category`, `account`, `to_account`, `description`, `notes: string[]`.
+  - `category`, `account` y `to_account` se restringen a un `enum` con los **nombres** de las categorías y cuentas activas del usuario (no IDs): gastan menos tokens y el esquema solo cambia cuando cambian los nombres, lo que aprovecha la caché de esquemas. El backend traduce nombres a IDs.
+  - `missing_fields` **lo calcula el backend** después de validar, no Claude.
 - **El prompt incluye jerga colombiana con ejemplos:**
   - "35 mil" → 35000; "una luca" → 1000; "2 palos" → 2000000;
   - fechas relativas: "ayer", "el viernes";
   - medios de pago: "con la débito", "con la tarjeta";
   - "pagué la tarjeta" → transferencia.
-- **Modelo configurable** por la variable `CLAUDE_MODEL`. Por defecto, Haiku (latencia y costo); el ID exacto se verifica en el plan.
-- **Timeout:** 8 s.
+- **Modelo configurable** con `CLAUDE_MODEL` (por defecto `claude-opus-5-5`) y `CLAUDE_EFFORT` (por defecto `low`). La alternativa más rápida y barata es `claude-haiku-4-5` con `CLAUDE_EFFORT` vacío, porque Haiku 4.5 no acepta `effort`. La elección final se toma con el set de evaluación (aciertos y latencia).
+- **Fallback del lado del servidor** ante rechazos de los clasificadores de seguridad (`fallbacks: "default"`, beta `server-side-fallback-2026-07-01`), activable con `CLAUDE_FALLBACKS`.
+- **Timeout:** 8 s, sin reintentos del SDK (`max_retries=0`).
 - **Validación con Pydantic** sobre la salida:
   - los IDs deben pertenecer al usuario y estar activos;
   - `amount > 0`;
@@ -246,6 +248,7 @@ Todas las tablas tienen `id UUID`, `created_at` y `updated_at`. Las tablas de do
   - crea una transacción `pending` con `source = recurring` para cada fecha atrasada (se pone al día con los días perdidos);
   - avanza `next_run_date`.
 - **Idempotente** gracias a `UNIQUE (recurring_template_id, date)`: correr el job dos veces no duplica nada.
+- **Edición de plantillas:** se pueden cambiar `type`, `amount`, cuentas, categoría, `description`, `end_date` y `active`. `day_of_month` y `start_date` no se editan (se borra y se crea otra), para evitar generar dos veces el mismo mes. Al reactivar una plantilla, si su `next_run_date` ya pasó, se mueve a la próxima ocurrencia desde hoy, en vez de generar todo lo atrasado.
 - **Acciones del usuario sobre un pendiente:**
   - **confirmar** (editando el monto u otros campos si hace falta);
   - **descartar** (se borra; la fecha ya quedó avanzada en la plantilla, así que no se regenera).
@@ -310,14 +313,14 @@ Cada funcionalidad se desarrolla test primero.
   - cálculo de la sugerencia de ahorro;
   - fechas de recurrentes (día 31 en meses cortos, años bisiestos, puesta al día);
   - "hoy" y "este mes" en `America/Bogota`.
-- **Integración de la API** con httpx (`AsyncClient`) contra **Postgres real**: Docker en local, *service container* en CI, con rollback por test.
+- **Integración de la API** con `TestClient` de FastAPI (basado en httpx; el backend es síncrono) contra **Postgres real**: Docker en local, *service container* en CI, con rollback por test.
 - **Acceso cruzado entre usuarios** en todos los endpoints de dominio.
 
 ### IA
 
 - **`FakeTransactionParser`** en los tests de servicio y de API.
 - **`ClaudeTransactionParser`** probado con el cliente de Anthropic mockeado: construcción del contexto mínimo, mapeo del tool use, validación y anulación de campos inválidos, timeouts.
-- **Set de evaluación** de unas 30 frases colombianas con su resultado esperado (`make eval-parser`), contra la API real. Se corre a mano; no corre en CI.
+- **Set de evaluación** de 30 frases colombianas con su resultado esperado (`uv run python -m evals.run_parser_eval`), contra la API real. Reporta aciertos y latencia p50/p95. Se corre a mano; no corre en CI.
 
 ### Frontend
 
@@ -360,7 +363,7 @@ Cada funcionalidad se desarrolla test primero.
 |---|---|---|
 | Autenticación | Propia en FastAPI, con sesiones opacas | Control total, sin atarse a un proveedor, revocable, encaja con multiusuario futuro |
 | Transcripción | Navegador (Web Speech y micrófono del teclado); el backend solo recibe texto | Gratis, funciona en Android, sin proveedor extra; la transcripción en servidor queda detrás de una interfaz |
-| Interpretación | Claude con tool use, contexto mínimo, confirmación obligatoria | Frases naturales y jerga local, minimización de datos |
+| Interpretación | Claude con structured outputs, contexto mínimo, confirmación obligatoria | Frases naturales y jerga local, minimización de datos |
 | Dinero | `BIGINT` en pesos | COP sin decimales, sin errores de punto flotante |
 | Pendientes | No cuentan en saldos ni presupuestos | Evitar contar gastos no confirmados |
 | Tarjeta de crédito | Cuenta con saldo negativo; el pago es una transferencia | Simple, sin doble conteo; el detalle de TC queda para la fase 3 |
