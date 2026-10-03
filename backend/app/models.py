@@ -2,7 +2,8 @@
 
 from app.accounts.models import Account
 from app.auth.models import Invitation, User, UserSession
+from app.budgets.models import Budget
 from app.categories.models import Category
 from app.transactions.models import Transaction
 
-__all__ = ["Account", "Category", "Invitation", "Transaction", "User", "UserSession"]
+__all__ = ["Account", "Budget", "Category", "Invitation", "Transaction", "User", "UserSession"]

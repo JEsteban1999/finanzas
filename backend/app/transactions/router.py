@@ -6,6 +6,7 @@ from sqlalchemy.orm import Session
 
 from app.auth.deps import get_current_user
 from app.auth.models import User
+from app.budgets.service import budget_effect
 from app.core.db import get_db
 from app.transactions.models import Transaction
 from app.transactions.schemas import (
@@ -30,7 +31,10 @@ router = APIRouter(prefix="/api/transactions", tags=["transactions"])
 
 
 def _saved(db: Session, user_id: uuid.UUID, txn: Transaction) -> TransactionSaved:
-    return TransactionSaved(transaction=TransactionOut.model_validate(txn))
+    return TransactionSaved(
+        transaction=TransactionOut.model_validate(txn),
+        budget_status=budget_effect(db, user_id, txn),
+    )
 
 
 @router.post("", status_code=201, response_model=TransactionSaved)

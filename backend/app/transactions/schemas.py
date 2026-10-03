@@ -4,6 +4,7 @@ from uuid import UUID
 
 from pydantic import BaseModel, ConfigDict
 
+from app.budgets.schemas import BudgetStatusItem
 from app.core.types import Description, Money
 
 TransactionType = Literal["income", "expense", "transfer"]
@@ -50,6 +51,7 @@ class TransactionOut(BaseModel):
 
 class TransactionSaved(BaseModel):
     transaction: TransactionOut
+    budget_status: BudgetStatusItem | None = None
 
 
 class TransactionPage(BaseModel):

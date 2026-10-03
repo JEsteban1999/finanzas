@@ -5,6 +5,7 @@ from starlette.responses import Response
 
 from app.accounts.router import router as accounts_router
 from app.auth.router import router as auth_router
+from app.budgets.router import router as budgets_router
 from app.categories.router import router as categories_router
 from app.core.config import get_settings
 from app.core.errors import error_body, register_error_handlers
@@ -42,6 +43,7 @@ def create_app() -> FastAPI:
     app.include_router(categories_router)
     app.include_router(accounts_router)
     app.include_router(transactions_router)
+    app.include_router(budgets_router)
     return app
 
 
