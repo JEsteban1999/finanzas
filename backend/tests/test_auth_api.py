@@ -151,3 +151,50 @@ def test_login_rate_limit_cannot_be_bypassed_by_rotating_client_ip(app, db):
         codes.append(response.status_code)
     assert codes[:10] == [401] * 10
     assert codes[10:] == [429, 429]
+
+
+def test_change_password(client_a, app, db):
+    other = TestClient(app, headers={"Origin": "http://localhost:3000"})
+    assert (
+        other.post(
+            "/api/auth/login", json={"email": "ana@example.com", "password": "clave-segura-123"}
+        ).status_code
+        == 200
+    )
+    response = client_a.post(
+        "/api/auth/change-password",
+        json={"current_password": "clave-segura-123", "new_password": "nueva-clave-456"},
+    )
+    assert response.status_code == 204
+    assert client_a.get("/api/auth/me").status_code == 200
+    assert other.get("/api/auth/me").status_code == 401
+    fresh = TestClient(app, headers={"Origin": "http://localhost:3000"})
+    ok = fresh.post(
+        "/api/auth/login", json={"email": "ana@example.com", "password": "nueva-clave-456"}
+    )
+    assert ok.status_code == 200
+
+
+def test_change_password_wrong_current(client_a):
+    response = client_a.post(
+        "/api/auth/change-password",
+        json={"current_password": "incorrecta-000", "new_password": "nueva-clave-456"},
+    )
+    assert response.status_code == 400
+    assert response.json()["error"]["code"] == "WRONG_PASSWORD"
+
+
+def test_change_password_short_new(client_a):
+    response = client_a.post(
+        "/api/auth/change-password",
+        json={"current_password": "clave-segura-123", "new_password": "corta"},
+    )
+    assert response.status_code == 422
+
+
+def test_change_password_requires_session(client):
+    response = client.post(
+        "/api/auth/change-password",
+        json={"current_password": "x" * 10, "new_password": "y" * 10},
+    )
+    assert response.status_code == 401

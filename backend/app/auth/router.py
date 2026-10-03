@@ -6,9 +6,10 @@ from sqlalchemy.orm import Session
 
 from app.auth.deps import SESSION_COOKIE, get_current_user, set_session_cookie
 from app.auth.models import User
-from app.auth.schemas import LoginIn, RegisterIn, UserOut
+from app.auth.schemas import ChangePasswordIn, LoginIn, RegisterIn, UserOut
 from app.auth.service import (
     authenticate,
+    change_password,
     create_session,
     normalize_email,
     register_with_invitation,
@@ -75,3 +76,15 @@ def logout(
 @router.get("/me", response_model=UserOut)
 def me(user: User = Depends(get_current_user)) -> User:
     return user
+
+
+@router.post("/change-password", status_code=204)
+def change_password_endpoint(
+    body: ChangePasswordIn,
+    request: Request,
+    user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+    now: datetime = Depends(get_now),
+) -> None:
+    token = request.cookies.get(SESSION_COOKIE) or ""
+    change_password(db, user, body.current_password, body.new_password, token, now)

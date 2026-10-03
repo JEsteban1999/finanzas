@@ -126,3 +126,10 @@ def test_delete_account_in_use_as_destination_conflicts(client_a, data):
     response = client_a.delete(f"/api/accounts/{data['savings']}")
     assert response.status_code == 409
     assert response.json()["error"]["code"] == "ACCOUNT_IN_USE"
+
+
+def test_in_use_messages_mention_all_references(client_a, data):
+    body = client_a.delete(f"/api/categories/{data['comida']}").json()
+    assert "en uso" in body["error"]["message"]
+    body = client_a.delete(f"/api/accounts/{data['savings']}").json()
+    assert "en uso" in body["error"]["message"]

@@ -86,5 +86,7 @@ def delete_category(db: Session, user_id: uuid.UUID, category_id: uuid.UUID) -> 
     except IntegrityError as exc:
         db.rollback()
         raise AppError(
-            409, "CATEGORY_IN_USE", "La categoría tiene movimientos; archívala en su lugar"
+            409,
+            "CATEGORY_IN_USE",
+            "La categoría está en uso (movimientos, recurrentes o regla de ahorro); archívala en su lugar",
         ) from exc

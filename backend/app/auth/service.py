@@ -26,6 +26,24 @@ def create_user(db: Session, email: str, password: str, display_name: str) -> Us
     return user
 
 
+def change_password(
+    db: Session, user: User, current: str, new: str, keep_token: str, now: datetime
+) -> None:
+    if not verify_password(user.password_hash, current):
+        raise AppError(400, "WRONG_PASSWORD", "La contraseña actual no es correcta")
+    user.password_hash = hash_password(new)
+    db.execute(
+        update(UserSession)
+        .where(
+            UserSession.user_id == user.id,
+            UserSession.revoked_at.is_(None),
+            UserSession.token_hash != hash_token(keep_token),
+        )
+        .values(revoked_at=now)
+    )
+    db.commit()
+
+
 def create_invitation(db: Session, email: str, now: datetime, valid_days: int = 7) -> str:
     token = new_token()
     db.add(
