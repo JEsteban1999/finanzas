@@ -1,4 +1,5 @@
-from collections.abc import Iterator
+from collections.abc import Callable, Iterator
+from datetime import datetime
 from pathlib import Path
 
 import pytest
@@ -9,6 +10,8 @@ from sqlalchemy import Engine, create_engine
 from sqlalchemy.orm import Session
 
 from alembic import command
+from app.auth.service import create_user
+from app.core.clock import get_now
 from app.core.config import get_settings
 from app.core.db import get_db
 from app.main import create_app
@@ -52,3 +55,33 @@ def app(db: Session) -> FastAPI:
 @pytest.fixture
 def client(app: FastAPI) -> TestClient:
     return TestClient(app, headers={"Origin": ORIGIN})
+
+
+@pytest.fixture
+def set_now(app: FastAPI) -> Callable[[datetime], None]:
+    def _set(moment: datetime) -> None:
+        app.dependency_overrides[get_now] = lambda: moment
+
+    return _set
+
+
+@pytest.fixture
+def make_client(app: FastAPI, db: Session) -> Callable[..., TestClient]:
+    def _make(email: str, password: str = "clave-segura-123") -> TestClient:
+        create_user(db, email, password, email.split("@")[0])
+        new_client = TestClient(app, headers={"Origin": ORIGIN})
+        response = new_client.post("/api/auth/login", json={"email": email, "password": password})
+        assert response.status_code == 200, response.text
+        return new_client
+
+    return _make
+
+
+@pytest.fixture
+def client_a(make_client: Callable[..., TestClient]) -> TestClient:
+    return make_client("ana@example.com")
+
+
+@pytest.fixture
+def client_b(make_client: Callable[..., TestClient]) -> TestClient:
+    return make_client("beto@example.com")

@@ -1,0 +1,87 @@
+import time
+from datetime import datetime
+
+from fastapi import APIRouter, Depends, Request, Response
+from sqlalchemy.orm import Session
+
+from app.auth.deps import SESSION_COOKIE, get_current_user
+from app.auth.models import User
+from app.auth.schemas import LoginIn, RegisterIn, UserOut
+from app.auth.service import (
+    authenticate,
+    create_session,
+    normalize_email,
+    register_with_invitation,
+    revoke_session,
+)
+from app.core.clock import get_now
+from app.core.config import get_settings
+from app.core.db import get_db
+from app.core.errors import AppError
+
+router = APIRouter(prefix="/api/auth", tags=["auth"])
+
+
+def _set_session_cookie(response: Response, token: str) -> None:
+    settings = get_settings()
+    response.set_cookie(
+        SESSION_COOKIE,
+        token,
+        max_age=settings.session_days * 86400,
+        httponly=True,
+        secure=settings.cookie_secure,
+        samesite="lax",
+        path="/",
+    )
+
+
+@router.post("/register", status_code=201, response_model=UserOut)
+def register(
+    body: RegisterIn,
+    request: Request,
+    response: Response,
+    db: Session = Depends(get_db),
+    now: datetime = Depends(get_now),
+) -> User:
+    user = register_with_invitation(db, body.token, body.password, body.display_name, now)
+    token = create_session(db, user, now, request.headers.get("user-agent"))
+    _set_session_cookie(response, token)
+    return user
+
+
+@router.post("/login", response_model=UserOut)
+def login(
+    body: LoginIn,
+    request: Request,
+    response: Response,
+    db: Session = Depends(get_db),
+    now: datetime = Depends(get_now),
+) -> User:
+    host = request.client.host if request.client else "unknown"
+    key = f"{host}|{normalize_email(body.email)}"
+    if not request.app.state.login_limiter.hit(key, time.monotonic()):
+        raise AppError(429, "LOGIN_RATE_LIMITED", "Demasiados intentos, espera un minuto")
+    user = authenticate(db, body.email, body.password)
+    if user is None:
+        raise AppError(401, "INVALID_CREDENTIALS", "Email o contraseña incorrectos")
+    token = create_session(db, user, now, request.headers.get("user-agent"))
+    _set_session_cookie(response, token)
+    return user
+
+
+@router.post("/logout", status_code=204)
+def logout(
+    request: Request,
+    response: Response,
+    db: Session = Depends(get_db),
+    now: datetime = Depends(get_now),
+) -> None:
+    token = request.cookies.get(SESSION_COOKIE)
+    if token:
+        revoke_session(db, token, now)
+    response.delete_cookie(SESSION_COOKIE, path="/")
+
+
+@router.get("/me", response_model=UserOut)
+def me(user: User = Depends(get_current_user)) -> User:
+    return user
