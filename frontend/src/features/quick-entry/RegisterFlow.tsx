@@ -1,5 +1,6 @@
 "use client";
 
+import { Mic, Square, Sparkles } from "lucide-react";
 import { useState, type FormEvent } from "react";
 import { FormError } from "@/components/FormError";
 import { ApiError, messageFor } from "@/lib/api/errors";
@@ -55,9 +56,9 @@ export function RegisterFlow() {
   if (step.name === "form") {
     const draft = step.draft;
     return (
-      <div className="flex flex-col gap-3">
-        {step.notice && <p>{step.notice}</p>}
-        {text.trim() && <p>Dijiste: {text.trim()}</p>}
+      <div className="card stack animate-[rise_320ms_cubic-bezier(0.2,0.8,0.2,1)]">
+        {step.notice && <p role="note">{step.notice}</p>}
+        {text.trim() && <p className="muted font-semibold">Dijiste: {text.trim()}</p>}
         <TransactionForm
           initial={draft ?? {}}
           missingFields={draft?.missing_fields ?? []}
@@ -70,24 +71,32 @@ export function RegisterFlow() {
   }
 
   return (
-    <form onSubmit={interpret} className="flex flex-col gap-3">
-      <label className="flex flex-col">
+    <form onSubmit={interpret} className="card stack">
+      <label>
         Cuéntame el movimiento
         <textarea
           value={text}
           maxLength={300}
-          rows={3}
+          rows={4}
+          className="!text-xl !leading-snug"
           placeholder="almorcé 35 mil con la débito"
           onChange={(e) => setText(e.target.value)}
         />
       </label>
-      <div className="flex flex-wrap gap-2">
+      <div className="actions">
         {speech.supported && (
-          <button type="button" onClick={speech.listening ? speech.stop : speech.start}>
+          <button
+            type="button"
+            aria-pressed={speech.listening}
+            className={speech.listening ? "!bg-[var(--mora)] !text-[var(--mora-ink)]" : "btn-soft"}
+            onClick={speech.listening ? speech.stop : speech.start}
+          >
+            {speech.listening ? <Square aria-hidden size={18} /> : <Mic aria-hidden size={20} strokeWidth={2.5} />}
             {speech.listening ? "Detener" : "Dictar"}
           </button>
         )}
-        <button type="submit" disabled={!text.trim() || parse.isPending}>
+        <button type="submit" disabled={!text.trim() || parse.isPending} className="flex-1">
+          <Sparkles aria-hidden size={20} strokeWidth={2.5} />
           {parse.isPending ? "Interpretando…" : "Interpretar"}
         </button>
         <button type="button" onClick={() => setStep({ name: "form", draft: null, notice: null, source: "manual" })}>

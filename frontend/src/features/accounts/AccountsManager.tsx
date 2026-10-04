@@ -35,14 +35,14 @@ function AccountRow({ account }: { account: Account }) {
   }
 
   return (
-    <li className="flex flex-col gap-1 border-b py-2">
-      <div className="flex justify-between gap-2">
+    <li className="row">
+      <div className="row-line font-bold">
         <span>{account.name}</span>
         <span>{formatCOP(account.balance)}</span>
       </div>
       <span>{ACCOUNT_TYPE_LABELS[account.type]}{account.archived ? " · archivada" : ""}</span>
       {renaming ? (
-        <form onSubmit={saveName} className="flex gap-2">
+        <form onSubmit={saveName} className="flex flex-wrap items-end gap-2">
           <label>
             Nuevo nombre
             <input value={name} onChange={(e) => setName(e.target.value)} required />
@@ -51,7 +51,7 @@ function AccountRow({ account }: { account: Account }) {
           <button type="button" onClick={() => setRenaming(false)}>Cancelar</button>
         </form>
       ) : (
-        <div className="flex flex-wrap gap-2">
+        <div className="actions pt-1">
           <button type="button" onClick={() => setRenaming(true)}>Renombrar</button>
           <button type="button" onClick={() => update.mutate({ id: account.id, archived: !account.archived })}>
             {account.archived ? "Restaurar" : "Archivar"}
@@ -88,14 +88,14 @@ export function AccountsManager() {
   }
 
   return (
-    <div className="flex flex-col gap-4">
-      <label className="flex gap-2">
+    <div className="page">
+      <label>
         <input type="checkbox" checked={showArchived} onChange={(e) => setShowArchived(e.target.checked)} />
         Mostrar archivadas
       </label>
       <FormError error={accounts.error} />
-      <ul>{accounts.data?.map((a) => <AccountRow key={a.id} account={a} />)}</ul>
-      <form onSubmit={onCreate} className="flex flex-col gap-2">
+      <ul className="card !py-1">{accounts.data?.map((a) => <AccountRow key={a.id} account={a} />)}</ul>
+      <form onSubmit={onCreate} className="card stack">
         <h2>Nueva cuenta</h2>
         <label className="flex flex-col">
           Nombre de la cuenta

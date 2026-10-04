@@ -32,7 +32,7 @@ export function RegisterForm() {
   }
 
   return (
-    <form onSubmit={onSubmit} className="flex flex-col gap-3">
+    <form onSubmit={onSubmit} className="stack">
       <label className="flex flex-col">
         Tu nombre
         <input required value={displayName} onChange={(e) => setDisplayName(e.target.value)} />

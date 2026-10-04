@@ -69,7 +69,7 @@ function RuleFields({ current, saved, onSaved }: RuleFieldsProps) {
   }
 
   return (
-    <form onSubmit={onSubmit} className="flex flex-col gap-3">
+    <form onSubmit={onSubmit} className="card stack">
       <p>Cuando recibas un ingreso de esta categoría, te propondré apartar ahorro de inmediato.</p>
       <label className="flex flex-col">
         Modo
@@ -97,13 +97,13 @@ function RuleFields({ current, saved, onSaved }: RuleFieldsProps) {
           {savingsAccounts.map((a) => <option key={a.id} value={a.id}>{a.name}</option>)}
         </select>
       </label>
-      <label className="flex gap-2">
+      <label>
         <input type="checkbox" checked={active} onChange={(e) => setActive(e.target.checked)} />
         Activa
       </label>
       <FormError error={localError ?? put.error ?? remove.error ?? rule.error ?? accounts.error ?? categories.error} />
       {saved && <p role="status">Regla guardada</p>}
-      <div className="flex gap-2">
+      <div className="actions pt-1">
         <button type="submit" disabled={put.isPending}>Guardar regla</button>
         {rule.data && (
           <ConfirmButton label="Quitar regla" confirmLabel="Sí, quitar" onConfirm={() => { onSaved(false); remove.mutate(); }} />

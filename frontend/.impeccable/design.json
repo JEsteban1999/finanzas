@@ -1,0 +1,170 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-10-03T00:00:00.000Z",
+  "title": "Design System: Bolsillo",
+  "extensions": {
+    "colorMeta": {
+      "mora": { "role": "primary", "displayName": "Mora", "canonical": "#b0124f", "darkCanonical": "#ff7aa8", "tonalRamp": ["#4a0620", "#6e0a33", "#8f0d42", "#b0124f", "#cf4474", "#e57a9f", "#f3adc6", "#fbe3ec"] },
+      "mora-soft": { "role": "primary", "displayName": "Mora suave", "canonical": "#fbe3ec", "darkCanonical": "#3d2029", "tonalRamp": ["#3d2029", "#6b3a4a", "#9a5b70", "#c98aa0", "#e5b2c3", "#f1cbd8", "#f7dbe5", "#fbe3ec"] },
+      "maize-ground": { "role": "neutral", "displayName": "Maiz tostado", "canonical": "#fbf1df", "darkCanonical": "#19130e", "tonalRamp": ["#19130e", "#34291f", "#6b5545", "#a38b73", "#d3bf9f", "#ead9c0", "#f6e8d2", "#fbf1df"] },
+      "surface": { "role": "neutral", "displayName": "Superficie de tarjeta", "canonical": "#ffffff", "darkCanonical": "#271e17", "tonalRamp": ["#271e17", "#34291f", "#42352a", "#6b5545", "#cdbba8", "#ead9c0", "#f6e8d2", "#ffffff"] },
+      "ink": { "role": "neutral", "displayName": "Tinta cacao", "canonical": "#2a1e14", "darkCanonical": "#f7eee4", "tonalRamp": ["#2a1e14", "#42352a", "#6b5545", "#8f7a69", "#b4a393", "#cdbba8", "#e8dccd", "#f7eee4"] },
+      "tint": { "role": "tertiary", "displayName": "Tinte miel", "canonical": "#fde5b4", "darkCanonical": "#3b2b17", "tonalRamp": ["#3b2b17", "#6b4d22", "#9a7030", "#c99a5b", "#e5bb7e", "#f3cf96", "#f9dca6", "#fde5b4"] },
+      "bar": { "role": "tertiary", "displayName": "Barra ambar", "canonical": "#c99a5b", "darkCanonical": "#b9a07a", "tonalRamp": ["#3b2b17", "#5e4424", "#82602f", "#a47a42", "#c99a5b", "#d9b27d", "#e8cca3", "#f4e4cb"] },
+      "pos": { "role": "semantic", "displayName": "Ingreso verde", "canonical": "#1c6b3e", "darkCanonical": "#86d9a6", "tonalRamp": ["#0b2e1a", "#124a2a", "#1c6b3e", "#3a8d5c", "#68b084", "#97d0ac", "#c3e6d0", "#dff2e5"] },
+      "warn": { "role": "semantic", "displayName": "Advertencia ambar quemado", "canonical": "#b0500a", "darkCanonical": "#ff9f4a", "tonalRamp": ["#4a2104", "#7a3607", "#b0500a", "#d17a33", "#e5a266", "#f1c394", "#f8dcbc", "#fdebcf"] },
+      "bad": { "role": "semantic", "displayName": "Excedido rojo ladrillo", "canonical": "#a1261c", "darkCanonical": "#ff9a8f", "tonalRamp": ["#470f0a", "#6e1710", "#a1261c", "#c24f45", "#d9807a", "#e8aaa5", "#f3cdc9", "#fbe0dc"] }
+    },
+    "typographyMeta": {
+      "display": { "displayName": "Titulo de pagina", "purpose": "h1; tambien la marca en barra lateral (900, 1.5rem) y login (900, 1.875rem)." },
+      "headline": { "displayName": "Titulo de tarjeta", "purpose": "h2 dentro de tarjetas." },
+      "title": { "displayName": "Fila y enlace", "purpose": "Filas de lista, filas de enlace y enlaces." },
+      "body": { "displayName": "Cuerpo", "purpose": "Texto y campos; base de documento de 18px; cifras tabulares." },
+      "label": { "displayName": "Etiqueta", "purpose": "Etiquetas de campo, leyendas y botones (800)." },
+      "caption": { "displayName": "Nota", "purpose": "Campo faltante, cabeceras de tabla, segmentos, etiquetas de navegacion." }
+    },
+    "shadows": [
+      { "name": "card", "value": "0 1px 2px rgb(92 58 24 / 0.06), 0 10px 28px -12px rgb(92 58 24 / 0.22)", "purpose": "Toda tarjeta en reposo. Oscuro: 0 1px 2px rgb(0 0 0 / 0.35), 0 12px 28px -14px rgb(0 0 0 / 0.7)." },
+      { "name": "press", "value": "0 1px 2px rgb(92 58 24 / 0.08), 0 4px 12px -6px rgb(92 58 24 / 0.2)", "purpose": "Token de presion; definido, sin uso en el CSS revisado." },
+      { "name": "mora-glow", "value": "0 8px 20px -10px var(--mora)", "purpose": "Resplandor del boton lleno." },
+      { "name": "register-glow", "value": "0 12px 24px -10px var(--mora)", "purpose": "Boton elevado central Registrar." },
+      { "name": "nav-bar", "value": "0 -10px 30px -18px rgb(60 36 14 / 0.35)", "purpose": "Barra inferior; el rail lateral usa 10px 0 30px -20px." }
+    ],
+    "motion": [
+      { "name": "spring", "value": "cubic-bezier(0.2, 0.8, 0.2, 1)", "purpose": "Curva de todas las transiciones de estado." },
+      { "name": "press-duration", "value": "160ms", "purpose": "Transform, sombra y fondo en lo tocable; escala 0.97 (0.98 tarjetas, 0.95 nav)." },
+      { "name": "rise", "value": "from opacity 0.4 / translateY(12px) to none", "purpose": "Entrada de la tarjeta de borrador cuando vuelve la IA." }
+    ],
+    "breakpoints": [
+      { "name": "lg", "value": "1024px", "purpose": "La barra inferior pasa a rail lateral de 15rem; contenido max-w-5xl con margen izquierdo de 18rem." }
+    ]
+  },
+  "components": [
+    {
+      "name": "Card",
+      "kind": "card",
+      "refersTo": "card",
+      "description": "Tarjeta blanda sin borde con sombra calida de dos capas.",
+      "html": "<div class=\"ds-card\"><h2>Tu mes</h2><p>Entraron <b>$4.200.000</b> y gastaste <b>$2.350.000</b>.</p></div>",
+      "css": ".ds-card { background: var(--surface, #fff); color: var(--ink, #2a1e14); border-radius: 22px; padding: 1.25rem; box-shadow: 0 1px 2px rgb(92 58 24 / 0.06), 0 10px 28px -12px rgb(92 58 24 / 0.22); font-family: Nunito, ui-rounded, system-ui, sans-serif; } .ds-card h2 { font-size: 1.1rem; font-weight: 800; margin: 0 0 0.35rem; } .ds-card p { margin: 0; font-weight: 600; } .ds-card b { font-weight: 800; }"
+    },
+    {
+      "name": "Card tint",
+      "kind": "card",
+      "refersTo": "card-tint",
+      "description": "Tarjeta destacada en tinte miel para la frase del mes.",
+      "html": "<div class=\"ds-card-tint\"><h2>Tu mes</h2><p>Llevas <b>85%</b> del presupuesto de Comida.</p></div>",
+      "css": ".ds-card-tint { background: var(--tint, #fde5b4); color: var(--ink, #2a1e14); border-radius: 22px; padding: 1.25rem; box-shadow: 0 1px 2px rgb(92 58 24 / 0.06), 0 10px 28px -12px rgb(92 58 24 / 0.22); font-family: Nunito, ui-rounded, system-ui, sans-serif; } .ds-card-tint h2 { font-size: 1.1rem; font-weight: 800; margin: 0 0 0.35rem; } .ds-card-tint p { margin: 0; font-weight: 600; } .ds-card-tint b { font-weight: 800; }"
+    },
+    {
+      "name": "Filled Button",
+      "kind": "button",
+      "refersTo": "button-filled",
+      "description": "Accion principal de la vista; la unica accion rellena de mora.",
+      "html": "<button class=\"ds-btn-filled\">Guardar</button>",
+      "css": ".ds-btn-filled { font: inherit; font-family: Nunito, ui-rounded, system-ui, sans-serif; font-weight: 800; font-size: 0.95rem; min-height: 2.9rem; padding: 0.6rem 1.15rem; border: 0; border-radius: 999px; background: var(--mora, #b0124f); color: var(--mora-ink, #fff); box-shadow: 0 8px 20px -10px var(--mora, #b0124f); cursor: pointer; transition: transform 160ms cubic-bezier(0.2,0.8,0.2,1); } .ds-btn-filled:active { transform: scale(0.97); } .ds-btn-filled:focus-visible { outline: 3px solid var(--mora, #b0124f); outline-offset: 3px; }"
+    },
+    {
+      "name": "Soft Button",
+      "kind": "button",
+      "refersTo": "button-soft",
+      "description": "Accion de fila o secundaria: mora sobre mora suave, sin sombra.",
+      "html": "<button class=\"ds-btn-soft\">Confirmar</button>",
+      "css": ".ds-btn-soft { font: inherit; font-family: Nunito, ui-rounded, system-ui, sans-serif; font-weight: 800; font-size: 0.95rem; min-height: 2.9rem; padding: 0.6rem 1.15rem; border: 0; border-radius: 999px; background: var(--mora-soft, #fbe3ec); color: var(--mora, #b0124f); cursor: pointer; transition: transform 160ms cubic-bezier(0.2,0.8,0.2,1); } .ds-btn-soft:active { transform: scale(0.97); } .ds-btn-soft:focus-visible { outline: 3px solid var(--mora, #b0124f); outline-offset: 3px; }"
+    },
+    {
+      "name": "Ghost Button",
+      "kind": "button",
+      "refersTo": "button-ghost",
+      "description": "Boton por defecto: texto mora, fondo mora suave solo en hover.",
+      "html": "<button class=\"ds-btn-ghost\">Editar</button>",
+      "css": ".ds-btn-ghost { font: inherit; font-family: Nunito, ui-rounded, system-ui, sans-serif; font-weight: 800; font-size: 0.95rem; min-height: 2.9rem; padding: 0.6rem 1.15rem; border: 0; border-radius: 999px; background: transparent; color: var(--mora, #b0124f); cursor: pointer; transition: transform 160ms cubic-bezier(0.2,0.8,0.2,1), background-color 160ms cubic-bezier(0.2,0.8,0.2,1); } .ds-btn-ghost:hover { background: var(--mora-soft, #fbe3ec); } .ds-btn-ghost:active { transform: scale(0.97); } .ds-btn-ghost:focus-visible { outline: 3px solid var(--mora, #b0124f); outline-offset: 3px; }"
+    },
+    {
+      "name": "Field",
+      "kind": "input",
+      "refersTo": "field",
+      "description": "Campo en superficie 2 con borde transparente que se vuelve mora al enfocar.",
+      "html": "<label class=\"ds-label\">Monto<input class=\"ds-input\" placeholder=\"$35.000\" /></label>",
+      "css": ".ds-label { display: flex; flex-direction: column; gap: 0.375rem; font-family: Nunito, ui-rounded, system-ui, sans-serif; font-weight: 700; font-size: 0.95rem; color: var(--ink, #2a1e14); } .ds-input { font: inherit; font-weight: 600; font-size: 1rem; color: var(--ink, #2a1e14); background: var(--surface-2, #f6e8d2); border: 2px solid transparent; border-radius: 14px; padding: 0.7rem 0.95rem; min-height: 3.1rem; width: 100%; box-sizing: border-box; transition: border-color 160ms cubic-bezier(0.2,0.8,0.2,1), background-color 160ms cubic-bezier(0.2,0.8,0.2,1); } .ds-input::placeholder { color: var(--ink-2, #6b5545); font-weight: 500; } .ds-input:focus { outline: none; border-color: var(--mora, #b0124f); background: var(--surface, #fff); } .ds-input[aria-invalid=\"true\"] { border-color: var(--warn, #b0500a); background: var(--warn-soft, #fdebcf); }"
+    },
+    {
+      "name": "Segmented type control",
+      "kind": "custom",
+      "refersTo": "segment",
+      "description": "Tipo de movimiento: tres pildoras, la elegida en mora suave con borde mora.",
+      "html": "<div class=\"ds-seg\"><span class=\"ds-seg-item\">Gasto</span><span class=\"ds-seg-item ds-seg-on\">Ingreso</span><span class=\"ds-seg-item\">Transferencia</span></div>",
+      "css": ".ds-seg { display: grid; grid-template-columns: minmax(0,1fr) minmax(0,1fr) minmax(0,1.4fr); gap: 0.35rem; font-family: Nunito, ui-rounded, system-ui, sans-serif; } .ds-seg-item { display: flex; align-items: center; justify-content: center; min-height: 2.9rem; padding: 0.55rem 0.6rem; font-size: 0.85rem; font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; border-radius: 999px; background: var(--surface-2, #f6e8d2); border: 2px solid transparent; color: var(--ink, #2a1e14); cursor: pointer; transition: transform 160ms cubic-bezier(0.2,0.8,0.2,1); } .ds-seg-item:active { transform: scale(0.97); } .ds-seg-on { background: var(--mora-soft, #fbe3ec); border-color: var(--mora, #b0124f); color: var(--mora, #b0124f); }"
+    },
+    {
+      "name": "Budget bar with levels",
+      "kind": "custom",
+      "refersTo": "bar-track",
+      "description": "Barra de presupuesto: ambar normal, advertencia, excedido; el texto cambia con el nivel.",
+      "html": "<div class=\"ds-bars\"><span class=\"ds-bar\"><span style=\"width:45%\"></span></span><span class=\"ds-bar ds-warn\"><span style=\"width:85%\"></span></span><span class=\"ds-bar ds-bad\"><span style=\"width:100%\"></span></span></div>",
+      "css": ".ds-bars { display: flex; flex-direction: column; gap: 0.9rem; } .ds-bar { display: block; height: 0.6rem; border-radius: 999px; background: var(--surface-2, #f6e8d2); overflow: hidden; } .ds-bar > span { display: block; height: 100%; border-radius: inherit; background: var(--bar, #c99a5b); } .ds-warn > span { background: var(--warn, #b0500a); } .ds-bad > span { background: var(--bad, #a1261c); }"
+    },
+    {
+      "name": "Category chip",
+      "kind": "chip",
+      "refersTo": "chip",
+      "description": "Circulo miel con el icono de categoria; marcador, no control.",
+      "html": "<span class=\"ds-chip\"><svg width=\"20\" height=\"20\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2.25\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"M3 11h18l-2 9H5z\"/><path d=\"M8 11V7a4 4 0 0 1 8 0v4\"/></svg></span>",
+      "css": ".ds-chip { display: inline-flex; align-items: center; justify-content: center; width: 2.25rem; height: 2.25rem; border-radius: 999px; background: var(--tint, #fde5b4); color: var(--ink, #2a1e14); }"
+    },
+    {
+      "name": "Bottom navigation",
+      "kind": "nav",
+      "refersTo": "nav-bar",
+      "description": "Barra inferior de cinco destinos con Registrar elevado como circulo mora; en lg es un rail lateral.",
+      "html": "<nav class=\"ds-nav\"><a class=\"ds-nav-i ds-nav-on\" href=\"#\"><svg width=\"24\" height=\"24\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2.75\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"M3 11l9-8 9 8v10H3z\"/></svg><span>Inicio</span></a><a class=\"ds-nav-i\" href=\"#\"><svg width=\"24\" height=\"24\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2.25\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01\"/></svg><span>Movimientos</span></a><a class=\"ds-nav-i ds-nav-reg\" href=\"#\"><b><svg width=\"30\" height=\"30\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2.75\" stroke-linecap=\"round\"><path d=\"M12 5v14M5 12h14\"/></svg></b><span>Registrar</span></a><a class=\"ds-nav-i\" href=\"#\"><svg width=\"24\" height=\"24\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2.25\" stroke-linecap=\"round\"><circle cx=\"12\" cy=\"12\" r=\"9\"/><circle cx=\"12\" cy=\"12\" r=\"4\"/></svg><span>Presupuestos</span></a><a class=\"ds-nav-i\" href=\"#\"><svg width=\"24\" height=\"24\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2.25\" stroke-linecap=\"round\"><path d=\"M5 12h.01M12 12h.01M19 12h.01\"/></svg><span>Mas</span></a></nav>",
+      "css": ".ds-nav { display: grid; grid-template-columns: repeat(5, 1fr); align-items: end; padding: 0.5rem 0.5rem; background: var(--surface, #fff); box-shadow: 0 -10px 30px -18px rgb(60 36 14 / 0.35); font-family: Nunito, ui-rounded, system-ui, sans-serif; } .ds-nav-i { display: flex; flex-direction: column; align-items: center; justify-content: flex-end; gap: 0.25rem; min-height: 3rem; font-size: 0.75rem; font-weight: 700; color: var(--ink-2, #6b5545); text-decoration: none; border-radius: 16px; transition: transform 150ms cubic-bezier(0.2,0.8,0.2,1); } .ds-nav-i:active { transform: scale(0.95); } .ds-nav-on { color: var(--mora, #b0124f); font-weight: 800; } .ds-nav-reg { color: var(--ink-2, #6b5545); } .ds-nav-reg b { display: flex; align-items: center; justify-content: center; width: 3.75rem; height: 3.75rem; margin-top: -1.75rem; border-radius: 999px; background: var(--mora, #b0124f); color: var(--mora-ink, #fff); box-shadow: 0 12px 24px -10px var(--mora, #b0124f); } .ds-nav-i:focus-visible { outline: 3px solid var(--mora, #b0124f); outline-offset: 3px; }"
+    },
+    {
+      "name": "Messages by role",
+      "kind": "custom",
+      "refersTo": "message-alert",
+      "description": "Una forma, tres pares de color: error, exito y nota de advertencia.",
+      "html": "<div class=\"ds-msgs\"><div class=\"ds-msg ds-msg-bad\">No pude interpretarlo, completalo a mano.</div><div class=\"ds-msg ds-msg-pos\">Guardado.</div><div class=\"ds-msg ds-msg-warn\">Llevas 85% del presupuesto de Comida.</div></div>",
+      "css": ".ds-msgs { display: flex; flex-direction: column; gap: 0.5rem; font-family: Nunito, ui-rounded, system-ui, sans-serif; } .ds-msg { border-radius: 14px; padding: 0.75rem 1rem; font-weight: 700; } .ds-msg-bad { background: var(--bad-soft, #fbe0dc); color: var(--bad, #a1261c); } .ds-msg-pos { background: var(--pos-soft, #dff2e5); color: var(--pos, #1c6b3e); } .ds-msg-warn { background: var(--warn-soft, #fdebcf); color: var(--warn, #b0500a); }"
+    }
+  ],
+  "narrative": {
+    "northStar": "El bolsillo de la casa",
+    "overview": "Bolsillo se siente como la libreta de cuentas de alguien de confianza: calida, redonda, escrita en voz de tu. El mes se cuenta en una frase con las cifras en negrilla, no en una metrica heroica. El fondo es maiz tostado de dia y cacao oscuro de noche; las tarjetas son blancas (o cacao claro) y blandas, con esquinas de 22px y sombras calidas y difusas.\n\nUn solo color saturado, la mora, marca todo lo que se puede tocar. Todo lo demas es neutro calido o un tinte semantico callado. El sistema rechaza la app de banco fria y corporativa y tambien el minimalismo gris vacio. El modo oscuro es de primera clase: cada token tiene su par oscuro.",
+    "keyCharacteristics": [
+      "Fondo calido teñido (maiz / cacao), nunca gris ni blanco puro de pagina.",
+      "Mora es el unico color saturado y solo sobre elementos accionables.",
+      "Nunito redondeada, base de 18px, cifras tabulares, pesos 600 a 900.",
+      "Tarjetas blandas con sombra calida en dos capas; sin bordes de tarjeta.",
+      "Todo lo tocable cede con un resorte suave (escala 0.97, 160ms).",
+      "Objetivos tactiles grandes (minimo 2.9rem) y contraste alto."
+    ],
+    "rules": [
+      { "name": "The One Saturated Color Rule", "body": "Mora es el unico color saturado y significa \"puedes tocar esto\". Ningun dato, categoria ni decoracion la usa. Si algo en pantalla es mora y no responde al toque, esta mal. (La bolsa de la marca es la unica excepcion: es el sello, no la interfaz.)", "section": "colors" },
+      { "name": "The Warm Ground Rule", "body": "Ningun fondo es gris frio ni blanco puro de pagina; el blanco solo aparece como tarjeta sobre maiz. En oscuro, el negro puro tampoco: cacao.", "section": "colors" },
+      { "name": "The Semantic Is Quiet Rule", "body": "Ingreso, advertencia y excedido son pares tinta-sobre-tinte, nunca rellenos saturados; el rojo no compite con la mora.", "section": "colors" },
+      { "name": "The Tabular Figures Rule", "body": "Todo numero va en cifras tabulares y en pesos enteros ($1.250.000); las columnas se alinean a la derecha.", "section": "typography" },
+      { "name": "The Sentence First Rule", "body": "La cifra clave del mes se lee dentro de una frase, con las cantidades en negrilla (800), no como un numero gigante aislado.", "section": "typography" },
+      { "name": "The Warm Shadow Rule", "body": "Las sombras son difusas, de dos capas y con tinte marron; ninguna es dura ni con desplazamiento sin desenfoque.", "section": "elevation" },
+      { "name": "The Press Spring Rule", "body": "Lo tocable responde con transform: scale(0.97) en 160ms con cubic-bezier(0.2, 0.8, 0.2, 1). prefers-reduced-motion reduce transiciones y animaciones a 0. La tarjeta de borrador entra con la animacion rise.", "section": "elevation" }
+    ],
+    "dos": [
+      "Do reservar la mora (#b0124f / #ff7aa8) para lo que se puede tocar, y usar los pares *-soft para fondos y estados suaves.",
+      "Do usar el tinte miel (#fde5b4) para la tarjeta destacada y los chips de categoria.",
+      "Do contar el mes en una frase con las cifras en negrilla y en cifras tabulares, pesos enteros ($1.250.000).",
+      "Do definir cada color nuevo con su par oscuro; el modo oscuro es de primera clase.",
+      "Do mantener tarjetas sin borde, de 22px, con la sombra Card; separar filas con una linea de 1px.",
+      "Do dar a todo lo tocable el resorte de presion (escala 0.97, 160ms) y objetivos de al menos 2.9rem.",
+      "Do escribir en español de Colombia, de tu, cercano y directo (\"Llevas 85% del presupuesto de Comida\"); la app propone, el usuario confirma."
+    ],
+    "donts": [
+      "Don't introducir un segundo color saturado ni usar mora en datos, categorias o decoracion.",
+      "Don't usar grises frios, blanco puro de pagina ni negro puro; el sistema es maiz y cacao.",
+      "Don't darle a la interfaz tono de app de banco (frio, corporativo, numeros heroicos aislados) ni dejarla en un minimalismo gris sin personalidad.",
+      "Don't comunicar estados solo por color: acompañalos de texto o icono.",
+      "Don't usar sombras duras, sin desenfoque o de color neutro en claro.",
+      "Don't apilar tarjetas dentro de tarjetas; usa filas con separador."
+    ]
+  }
+}

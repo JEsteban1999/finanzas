@@ -51,25 +51,25 @@ export function SaveFeedback({ result, onDone }: Props) {
   }
 
   return (
-    <section className="flex flex-col gap-3">
+    <section className="card stack animate-[rise_320ms_cubic-bezier(0.2,0.8,0.2,1)]">
       <p role="status">Movimiento guardado</p>
       {warning && <p role="alert">{warning}</p>}
       {showSuggestion && suggestion && (
-        <form onSubmit={accept} className="flex flex-col gap-2">
-          <p>Págate primero: ¿apartas {formatCOP(suggestion.amount)} para tu ahorro?</p>
-          <label className="flex flex-col">
+        <form onSubmit={accept} className="stack rounded-[var(--radius-field)] bg-[var(--surface-2)] p-4">
+          <p className="text-lg font-bold">Págate primero: ¿apartas {formatCOP(suggestion.amount)} para tu ahorro?</p>
+          <label>
             Monto a apartar
             <input inputMode="numeric" value={amountText} onChange={(e) => setAmountText(e.target.value)} />
           </label>
           <FormError error={localError ?? create.error} />
-          <div className="flex gap-2">
+          <div className="actions">
             <button type="submit" disabled={create.isPending}>Apartar</button>
             <button type="button" onClick={() => setShowSuggestion(false)}>Ahora no</button>
           </div>
         </form>
       )}
-      {saved !== null && <p>Listo, apartaste {formatCOP(saved)}.</p>}
-      <button type="button" onClick={onDone}>Listo</button>
+      {saved !== null && <p className="font-bold text-[var(--pos)]">Listo, apartaste {formatCOP(saved)}.</p>}
+      <button type="button" onClick={onDone} className="self-start">Listo</button>
     </section>
   );
 }

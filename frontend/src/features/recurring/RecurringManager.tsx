@@ -18,14 +18,14 @@ function TemplateRow({ template, title }: { template: RecurringTemplate; title: 
   const update = useUpdateRecurring();
   const remove = useDeleteRecurring();
   return (
-    <li className="flex flex-col gap-1 border-b py-2">
-      <div className="flex justify-between gap-2">
+    <li className="row">
+      <div className="row-line font-bold">
         <span>{title}</span>
         <span>{signedAmount(template)}</span>
       </div>
       <span>{`Día ${template.day_of_month} de cada mes · Próximo: ${shortDate(template.next_run_date)}`}</span>
       {!template.active && <span>Pausada</span>}
-      <div className="flex gap-2">
+      <div className="actions pt-1">
         <button type="button" onClick={() => update.mutate({ id: template.id, active: !template.active })}>
           {template.active ? "Pausar" : "Reanudar"}
         </button>
@@ -81,7 +81,7 @@ function NewTemplateForm() {
   }
 
   return (
-    <form aria-label="Nueva plantilla" onSubmit={onSubmit} className="flex flex-col gap-2">
+    <form aria-label="Nueva plantilla" onSubmit={onSubmit} className="card stack">
       <h2>Nueva plantilla</h2>
       <label className="flex flex-col">
         Tipo
@@ -154,9 +154,9 @@ export function RecurringManager() {
     "Recurrente";
 
   return (
-    <div className="flex flex-col gap-4">
+    <div className="page">
       <FormError error={templates.error} />
-      <ul>{templates.data?.map((t) => <TemplateRow key={t.id} template={t} title={titleOf(t)} />)}</ul>
+      <ul className="card !py-1">{templates.data?.map((t) => <TemplateRow key={t.id} template={t} title={titleOf(t)} />)}</ul>
       <NewTemplateForm />
     </div>
   );

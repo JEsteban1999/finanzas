@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { CategoryIcon } from "@/components/CategoryIcon";
 import { ConfirmButton } from "@/components/ConfirmButton";
 import { FormError } from "@/components/FormError";
 import { shortDate } from "@/lib/dates";
@@ -21,12 +22,17 @@ function PendingRow({
   const { title, detail } = describeTransaction(txn, names);
 
   return (
-    <li className="flex flex-col gap-1 border-b py-2">
-      <div className="flex justify-between gap-2">
-        <span>{title}</span>
-        <span>{signedAmount(txn)}</span>
+    <li className="row">
+      <div className="flex items-start gap-3">
+        <CategoryIcon name={names.category(txn.category_id)} transfer={txn.type === "transfer"} />
+        <div className="flex flex-1 flex-col gap-0.5">
+          <div className="row-line">
+            <span className="font-bold">{title}</span>
+            <span className={`money ${txn.type === "income" ? "money-in" : ""}`}>{signedAmount(txn)}</span>
+          </div>
+          <span className="text-sm font-semibold text-[var(--ink-2)]">{shortDate(txn.date)} · {detail}</span>
+        </div>
       </div>
-      <span>{shortDate(txn.date)} · {detail}</span>
       {confirming ? (
         <TransactionForm
           initial={txn}
@@ -38,7 +44,7 @@ function PendingRow({
           }}
         />
       ) : (
-        <div className="flex gap-2">
+        <div className="actions pt-1">
           <button type="button" onClick={() => setConfirming(true)}>Confirmar</button>
           <ConfirmButton label="Descartar" confirmLabel="Sí, descartar" onConfirm={() => remove.mutate(txn.id)} />
         </div>
@@ -55,12 +61,12 @@ export function PendingList() {
   const items = list.data?.pages.flatMap((page) => page.items) ?? [];
   if (items.length === 0 && !result) return <FormError error={list.error} />;
   return (
-    <section className="flex flex-col gap-2">
+    <section className="stack">
       {result && <SaveFeedback result={result} onDone={() => setResult(null)} />}
       {items.length > 0 && (
         <>
           <h2>Por confirmar</h2>
-          <ul>
+          <ul className="card !py-1 ring-2 ring-[var(--warn-soft)]">
             {items.map((txn) => <PendingRow key={txn.id} txn={txn} names={names} onConfirmed={setResult} />)}
           </ul>
         </>
