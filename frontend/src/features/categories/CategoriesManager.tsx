@@ -25,10 +25,10 @@ function CategoryRow({ category }: { category: Category }) {
   }
 
   return (
-    <li className="flex flex-col gap-1 border-b py-2">
+    <li className="row">
       <span>{category.name}{category.archived ? " · archivada" : ""}</span>
       {renaming ? (
-        <form onSubmit={saveName} className="flex gap-2">
+        <form onSubmit={saveName} className="flex flex-wrap items-end gap-2">
           <label>
             Nuevo nombre
             <input value={name} onChange={(e) => setName(e.target.value)} required />
@@ -37,7 +37,7 @@ function CategoryRow({ category }: { category: Category }) {
           <button type="button" onClick={() => setRenaming(false)}>Cancelar</button>
         </form>
       ) : (
-        <div className="flex flex-wrap gap-2">
+        <div className="actions pt-1">
           <button type="button" onClick={() => setRenaming(true)}>Renombrar</button>
           <button type="button" onClick={() => update.mutate({ id: category.id, archived: !category.archived })}>
             {category.archived ? "Restaurar" : "Archivar"}
@@ -73,14 +73,14 @@ export function CategoriesManager() {
   }
 
   return (
-    <div className="flex flex-col gap-4">
-      <label className="flex gap-2">
+    <div className="page">
+      <label>
         <input type="checkbox" checked={showArchived} onChange={(e) => setShowArchived(e.target.checked)} />
         Mostrar archivadas
       </label>
       <FormError error={categories.error} />
       {GROUPS.map((group) => (
-        <section key={group.kind} aria-label={group.title}>
+        <section key={group.kind} aria-label={group.title} className="card !py-3">
           <h2>{group.title}</h2>
           <ul>
             {categories.data?.filter((c) => c.kind === group.kind).map((c) => (
@@ -89,7 +89,7 @@ export function CategoriesManager() {
           </ul>
         </section>
       ))}
-      <form onSubmit={onCreate} className="flex flex-col gap-2">
+      <form onSubmit={onCreate} className="card stack">
         <h2>Nueva categoría</h2>
         <label className="flex flex-col">
           Nombre de la categoría

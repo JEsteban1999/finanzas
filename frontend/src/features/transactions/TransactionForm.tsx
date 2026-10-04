@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useState, type FormEvent } from "react";
+import { CategoryIcon } from "@/components/CategoryIcon";
 import { FormError } from "@/components/FormError";
 import { useAccounts } from "@/features/accounts/api";
 import { useCategories } from "@/features/categories/api";
@@ -128,11 +129,11 @@ export function TransactionForm({ initial = {}, missingFields = [], submitLabel,
   }
 
   return (
-    <form onSubmit={handleSubmit} className="flex flex-col gap-3" noValidate>
+    <form onSubmit={handleSubmit} className="stack" noValidate>
       <fieldset {...fieldProps("type")}>
         <legend>Tipo</legend>
         {TYPES.map((t) => (
-          <label key={t.value} className="mr-3">
+          <label key={t.value}>
             <input type="radio" name="type" value={t.value} checked={type === t.value}
               onChange={() => changeType(t.value)} />
             {t.label}
@@ -191,12 +192,15 @@ export function TransactionForm({ initial = {}, missingFields = [], submitLabel,
         <div className="flex flex-col">
           <label className="flex flex-col">
             Categoría
+            <span className="flex items-center gap-3">
+            <CategoryIcon name={kindCategories.find((c) => c.id === categoryId)?.name} />
             <select value={categoryId} onChange={(e) => setCategoryId(e.target.value)}
               {...fieldProps("category_id")}>
               <option value="">Elige una categoría</option>
               {kindCategories.map((c) => <option key={c.id} value={c.id}>{c.name}</option>)}
               {archivedCategories.map((c) => <option key={c.id} value={c.id}>{c.name} (archivada)</option>)}
             </select>
+          </span>
           </label>
           {hint("category_id")}
         </div>
@@ -219,7 +223,7 @@ export function TransactionForm({ initial = {}, missingFields = [], submitLabel,
       )}
       <FormError error={accounts.error ?? categories.error} />
 
-      <div className="flex gap-2">
+      <div className="actions pt-1">
         <button type="submit" disabled={saving}>{submitLabel}</button>
         {onCancel && <button type="button" onClick={onCancel}>Cancelar</button>}
       </div>

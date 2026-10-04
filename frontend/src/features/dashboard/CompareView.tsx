@@ -13,7 +13,7 @@ export function CompareView() {
   const data = compare.data;
 
   return (
-    <div className="flex flex-col gap-4">
+    <div className="page">
       <label className="flex flex-col">
         Meses
         <select value={months} onChange={(e) => setMonths(Number(e.target.value))}>
@@ -25,7 +25,7 @@ export function CompareView() {
       <FormError error={compare.error} />
       {data && (
         <>
-          <table>
+          <div className="card overflow-x-auto !p-0"><table className="data-table">
             <thead>
               <tr><th>Mes</th><th>Ingresos</th><th>Gastos</th><th>Ahorro</th></tr>
             </thead>
@@ -39,8 +39,8 @@ export function CompareView() {
                 </tr>
               ))}
             </tbody>
-          </table>
-          <section aria-label="Cambios por categoría">
+          </table></div>
+          <section aria-label="Cambios por categoría" className="card stack">
             <h2>Frente al mes anterior</h2>
             <ul>
               {data.categories.map((c) => (

@@ -42,3 +42,9 @@ next-env.d.ts
 
 # allow committing the env template
 !.env.example
+
+# impeccable: artefactos de trabajo (se conservan surfaces/ y design.json)
+.impeccable/questions/
+.impeccable/review/
+.impeccable/brief-body.md
+.impeccable/decision-direction.json

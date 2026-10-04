@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { CategoryIcon } from "@/components/CategoryIcon";
 import { ConfirmButton } from "@/components/ConfirmButton";
 import { FormError } from "@/components/FormError";
 import { MonthPicker } from "@/components/MonthPicker";
@@ -42,12 +43,17 @@ function TransactionRow({ txn, names }: { txn: Transaction; names: ReturnType<ty
   const { title, detail } = describeTransaction(txn, names);
 
   return (
-    <li className="flex flex-col gap-1 border-b py-2">
-      <div className="flex justify-between gap-2">
-        <span>{title}</span>
-        <span>{signedAmount(txn)}</span>
+    <li className="row">
+      <div className="flex items-start gap-3">
+        <CategoryIcon name={names.category(txn.category_id)} transfer={txn.type === "transfer"} />
+        <div className="flex flex-1 flex-col gap-0.5">
+          <div className="row-line">
+            <span className="font-bold">{title}</span>
+            <span className={`money ${txn.type === "income" ? "money-in" : ""}`}>{signedAmount(txn)}</span>
+          </div>
+          <span className="text-sm font-semibold text-[var(--ink-2)]">{shortDate(txn.date)} · {detail}</span>
+        </div>
       </div>
-      <span>{shortDate(txn.date)} · {detail}</span>
       {editing ? (
         <TransactionForm
           initial={txn}
@@ -59,7 +65,7 @@ function TransactionRow({ txn, names }: { txn: Transaction; names: ReturnType<ty
           }}
         />
       ) : (
-        <div className="flex gap-2">
+        <div className="actions pt-1">
           <button type="button" onClick={() => setEditing(true)}>Editar</button>
           <ConfirmButton label="Borrar" onConfirm={() => remove.mutate(txn.id)} />
         </div>
@@ -87,9 +93,9 @@ export function TransactionList() {
   const items = list.data?.pages.flatMap((page) => page.items) ?? [];
 
   return (
-    <section className="flex flex-col gap-3">
+    <section className="page">
       <MonthPicker month={month} onChange={setMonth} />
-      <div className="flex flex-wrap gap-2">
+      <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
         <label className="flex flex-col">
           Tipo
           <select value={type} onChange={(e) => setType(e.target.value as TransactionType | "")}>
@@ -116,7 +122,9 @@ export function TransactionList() {
       </div>
       <FormError error={list.error} />
       {list.isSuccess && items.length === 0 && <p>No hay movimientos en este mes.</p>}
-      <ul>{items.map((txn) => <TransactionRow key={txn.id} txn={txn} names={names} />)}</ul>
+      {items.length > 0 && (
+        <ul className="card !py-1">{items.map((txn) => <TransactionRow key={txn.id} txn={txn} names={names} />)}</ul>
+      )}
       {list.hasNextPage && (
         <button type="button" onClick={() => list.fetchNextPage()} disabled={list.isFetchingNextPage}>
           Cargar más

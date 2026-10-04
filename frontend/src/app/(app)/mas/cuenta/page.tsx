@@ -15,12 +15,14 @@ export default function AccountPage() {
   }
 
   return (
-    <section className="flex flex-col gap-4">
+    <section className="page">
       <h1>Mi cuenta</h1>
-      {me.data && <p>{me.data.email}</p>}
-      <h2>Cambiar contraseña</h2>
-      <ChangePasswordForm />
-      <button type="button" onClick={onLogout} disabled={logout.isPending}>Cerrar sesión</button>
+      {me.data && <p className="muted font-bold">{me.data.email}</p>}
+      <div className="card stack">
+        <h2>Cambiar contraseña</h2>
+        <ChangePasswordForm />
+      </div>
+      <button type="button" className="self-start" onClick={onLogout} disabled={logout.isPending}>Cerrar sesión</button>
     </section>
   );
 }

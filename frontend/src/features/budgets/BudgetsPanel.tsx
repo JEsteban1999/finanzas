@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, type FormEvent } from "react";
+import { CategoryIcon } from "@/components/CategoryIcon";
 import { FormError } from "@/components/FormError";
 import { MonthPicker } from "@/components/MonthPicker";
 import { currentMonth } from "@/lib/dates";
@@ -32,15 +33,22 @@ function BudgetRow({ item, month }: { item: BudgetStatusItem; month: string }) {
   }
 
   return (
-    <li className="flex flex-col gap-1 border-b py-2" data-level={item.level}>
-      <span>{item.category_name}</span>
-      <span>
+    <li className="row" data-level={item.level}>
+      <span className="row-line">
+        <span className="flex items-center gap-3 font-bold"><CategoryIcon name={item.category_name} />{item.category_name}</span>
+        <span className="text-sm font-extrabold" data-level={item.level}>{LEVEL_LABELS[item.level]}</span>
+      </span>
+      <span className="font-semibold text-[var(--ink-2)]">
         {item.level === "none" ? `Gastado: ${formatCOP(item.spent)}` : `${formatCOP(item.spent)} de ${formatCOP(item.budget)}`}
       </span>
-      <span>{LEVEL_LABELS[item.level]}</span>
-      {item.committed > 0 && <span>Comprometido: {formatCOP(item.committed)}</span>}
-      <form onSubmit={save} className="flex gap-2">
-        <label className="flex flex-col">
+      {item.level !== "none" && (
+        <span aria-hidden className="bar" data-level={item.level}>
+          <span style={{ width: `${Math.min(100, item.percent ?? 0)}%` }} />
+        </span>
+      )}
+      {item.committed > 0 && <span className="text-sm font-semibold text-[var(--ink-2)]">Comprometido: {formatCOP(item.committed)}</span>}
+      <form onSubmit={save} className="flex items-end gap-2 pt-1">
+        <label className="flex-1">
           Presupuesto de {item.category_name}
           <input inputMode="numeric" value={text} onChange={(e) => setText(e.target.value)} />
         </label>
@@ -55,11 +63,11 @@ export function BudgetsPanel() {
   const [month, setMonth] = useState(currentMonth());
   const status = useBudgetStatus(month);
   return (
-    <div className="flex flex-col gap-3">
+    <div className="page">
       <MonthPicker month={month} onChange={setMonth} />
       <p>El presupuesto aplica desde este mes en adelante.</p>
       <FormError error={status.error} />
-      <ul>
+      <ul className="card !py-1 lg:grid lg:grid-cols-2 lg:gap-x-8">
         {status.data?.items.map((item) => (
           <BudgetRow key={`${month}-${item.category_id}`} item={item} month={month} />
         ))}

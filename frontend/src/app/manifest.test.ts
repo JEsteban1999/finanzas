@@ -5,8 +5,8 @@ describe("manifest", () => {
   it("describes an installable standalone app", () => {
     const m = manifest();
     expect(m).toMatchObject({
-      name: "Finanzas",
-      short_name: "Finanzas",
+      name: "Bolsillo",
+      short_name: "Bolsillo",
       lang: "es-CO",
       start_url: "/",
       display: "standalone",

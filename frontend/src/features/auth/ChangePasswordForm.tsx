@@ -30,7 +30,7 @@ export function ChangePasswordForm() {
   }
 
   return (
-    <form onSubmit={onSubmit} className="flex flex-col gap-3">
+    <form onSubmit={onSubmit} className="stack">
       <label className="flex flex-col">
         Contraseña actual
         <input type="password" autoComplete="current-password" required value={current}
